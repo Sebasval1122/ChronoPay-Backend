@@ -1,28 +1,28 @@
-"""
-Configuración principal del proyecto: Plataforma de Nómina y Asistencia
-"""
+"""Configuración principal del proyecto ChronoPay."""
 
-from pathlib import Path
 from datetime import timedelta
 import os
+from pathlib import Path
 
-# ---------------------------------------------------------
-# Rutas base
-# ---------------------------------------------------------
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ---------------------------------------------------------
-# Seguridad
-# ---------------------------------------------------------
-SECRET_KEY = os.environ.get("SECRET_KEY", "cambia-esta-clave-en-produccion")
 
-DEBUG = os.environ.get("DEBUG", "True") == "True"
+def get_env_bool(name: str, default: bool = False) -> bool:
+    """Convierte variables de entorno a bool."""
+    return str(os.getenv(name, str(default))).strip().lower() in {"1", "true", "yes", "on"}
 
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
-# ---------------------------------------------------------
-# Aplicaciones instaladas
-# ---------------------------------------------------------
+def get_env_list(name: str, default: str = "") -> list[str]:
+    """Convierte una lista separada por comas en una lista de strings."""
+    raw_value = os.getenv(name, default)
+    return [item.strip() for item in raw_value.split(",") if item.strip()]
+
+
+SECRET_KEY = os.getenv("SECRET_KEY", "cambia-esta-clave-en-produccion")
+DEBUG = get_env_bool("DEBUG", True)
+ALLOWED_HOSTS = get_env_list("ALLOWED_HOSTS", "localhost,127.0.0.1")
+
 INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
@@ -30,13 +30,9 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
-    # Librerías externas
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
-
-    # Apps propias del proyecto
     "usuarios",
     "sucursales",
     "asistencia",
@@ -48,10 +44,6 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = "usuarios.Usuario"
-
-# ---------------------------------------------------------
-# Middleware
-# ---------------------------------------------------------
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
@@ -64,10 +56,6 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "config.urls"
-
-# ---------------------------------------------------------
-# Templates (necesario para el admin de Django)
-# ---------------------------------------------------------
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -85,25 +73,19 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
+ASGI_APPLICATION = "config.asgi.application"
 
-# ---------------------------------------------------------
-# Base de datos
-# Por defecto SQLite para desarrollo; en producción usar PostgreSQL
-# ---------------------------------------------------------
 DATABASES = {
     "default": {
-        "ENGINE": os.environ.get("DB_ENGINE", "django.db.backends.sqlite3"),
-        "NAME": os.environ.get("DB_NAME", BASE_DIR / "db.sqlite3"),
-        "USER": os.environ.get("DB_USER", ""),
-        "PASSWORD": os.environ.get("DB_PASSWORD", ""),
-        "HOST": os.environ.get("DB_HOST", ""),
-        "PORT": os.environ.get("DB_PORT", ""),
+        "ENGINE": os.getenv("DB_ENGINE", "django.db.backends.sqlite3"),
+        "NAME": os.getenv("DB_NAME", str(BASE_DIR / "db.sqlite3")),
+        "USER": os.getenv("DB_USER", ""),
+        "PASSWORD": os.getenv("DB_PASSWORD", ""),
+        "HOST": os.getenv("DB_HOST", ""),
+        "PORT": os.getenv("DB_PORT", ""),
     }
 }
 
-# ---------------------------------------------------------
-# Validación de contraseñas
-# ---------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -111,24 +93,14 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# ---------------------------------------------------------
-# Internacionalización
-# ---------------------------------------------------------
 LANGUAGE_CODE = "es"
-TIME_ZONE = os.environ.get("TIME_ZONE", "America/Bogota")
+TIME_ZONE = os.getenv("TIME_ZONE", "America/Bogota")
 USE_I18N = True
 USE_TZ = True
 
-# ---------------------------------------------------------
-# Archivos estáticos
-# ---------------------------------------------------------
 STATIC_URL = "static/"
-
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-# ---------------------------------------------------------
-# Django REST Framework
-# ---------------------------------------------------------
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
@@ -145,9 +117,4 @@ SIMPLE_JWT = {
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
 }
 
-# ---------------------------------------------------------
-# CORS (útil si luego conectas un frontend por separado)
-# ---------------------------------------------------------
-CORS_ALLOWED_ORIGINS = os.environ.get(
-    "CORS_ALLOWED_ORIGINS", "http://localhost:3000"
-).split(",")
+CORS_ALLOWED_ORIGINS = get_env_list("CORS_ALLOWED_ORIGINS", "http://localhost:3000")

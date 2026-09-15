@@ -1,26 +1,12 @@
-from rest_framework import viewsets, permissions
-from .models import ReglaLaboral, DiaFestivo
-from .serializers import ReglaLaboralSerializer, DiaFestivoSerializer
+from rest_framework import viewsets
 
-
-class EsAdminGeneral(permissions.BasePermission):
-    """
-    Solo el admin general puede crear/editar/eliminar reglas laborales.
-    Cualquier usuario autenticado puede consultarlas (lectura).
-    """
-
-    def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return request.user and request.user.is_authenticated
-        return request.user and request.user.is_authenticated and getattr(
-            request.user, "rol", None
-        ) == "admin_general"
+from .models import DiaFestivo, ReglaLaboral
+from .permissions import EsAdminGeneral
+from .serializers import DiaFestivoSerializer, ReglaLaboralSerializer
 
 
 class ReglaLaboralViewSet(viewsets.ModelViewSet):
-    """
-    CRUD de reglas laborales por país (horas extra, recargos, límites legales).
-    """
+    """CRUD de reglas laborales por país."""
 
     queryset = ReglaLaboral.objects.all()
     serializer_class = ReglaLaboralSerializer
@@ -35,9 +21,7 @@ class ReglaLaboralViewSet(viewsets.ModelViewSet):
 
 
 class DiaFestivoViewSet(viewsets.ModelViewSet):
-    """
-    CRUD de días festivos asociados a una regla laboral (país).
-    """
+    """CRUD de días festivos asociados a una regla laboral."""
 
     queryset = DiaFestivo.objects.all()
     serializer_class = DiaFestivoSerializer
