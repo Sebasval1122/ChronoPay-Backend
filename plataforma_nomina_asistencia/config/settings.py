@@ -35,7 +35,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "usuarios",
     "sucursales",
-    "asistencia",
+    "registro",
     "nomina",
     "reglas_laborales",
     "novedades",

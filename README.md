@@ -98,7 +98,7 @@ plataforma_nomina_asistencia/
 │   └── migrations/
 │       └── __init__.py
 │
-├── asistencia/                    # Registro de marcajes
+├── registro/                      # Registro de marcajes
 │   ├── __init__.py
 │   ├── models.py
 │   ├── serializers.py

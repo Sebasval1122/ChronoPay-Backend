@@ -1,1 +1,0 @@
-"""Migraciones de la aplicación de asistencia."""
