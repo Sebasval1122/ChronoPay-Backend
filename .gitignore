@@ -12,6 +12,7 @@ staticfiles/
 .env
 .venv/
 venv/
+node_modules/
 
 # IDE y sistema operativo
 .vscode/
