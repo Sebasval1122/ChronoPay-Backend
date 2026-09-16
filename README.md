@@ -58,52 +58,89 @@ Usuario final que registra su asistencia y consulta su propia información.
 
 ## Estructura del proyecto
 
+```text
 plataforma_nomina_asistencia/
 ├── manage.py
-├── config/                      # Configuración del proyecto (settings, urls raíz, wsgi/asgi)
-│   ├── settings.py
-│   └── urls.py
-│
-├── usuarios/                    # App: usuarios y autenticación
-│   ├── models.py                # Modelo Usuario (admin, gerente, empleado)
-│   ├── views.py                 # Equivalente a "controllers": login, CRUD de usuarios
-│   ├── serializers.py           # Si usas Django REST Framework
-│   ├── permissions.py           # Permisos por rol
-│   └── urls.py
-│
-├── sucursales/                  # App: sucursales
-│   ├── models.py
-│   ├── views.py
-│   └── urls.py
-│
-├── asistencia/                  # App: registro de marcajes
-│   ├── models.py                # Modelo Marcaje
-│   ├── views.py                 # Registro y consulta de asistencia
-│   └── urls.py
-│
-├── nomina/                      # App: cálculo de nómina (tu diferenciador)
-│   ├── models.py                # Modelo Nomina, HistorialSalarial
-│   ├── services.py              # Lógica de cálculo: horas extra, recargos festivos
-│   ├── views.py
-│   └── urls.py
-│
-├── reglas_laborales/            # App: reglas por país
-│   ├── models.py
-│   └── views.py
-│
-├── comprobantes/                # App: generación de PDFs
-│   ├── services.py              # Generación del PDF (reportlab/weasyprint)
-│   └── views.py
-│
-├── solicitudes/                 # App: vacaciones/permisos
-│   ├── models.py
-│   └── views.py
-│
-├── reportes/                    # App: reportes para auditorías/entes gubernamentales
-│   └── views.py
-│
+├── .env.example
 ├── requirements.txt
-└── .env.example
+│
+├── config/                         # Configuración global de Django
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+│
+├── database/                       # Configuración y documentación de la BD
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── sqlite.py
+│   ├── postgres.py
+│   └── README.md
+│
+├── usuarios/                       # Usuarios, roles y autenticación
+│   ├── __init__.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── permissions.py
+│   ├── views.py
+│   ├── urls.py                     # CRUD de usuarios
+│   ├── urls_auth.py                # Login y refresh JWT
+│   └── migrations/
+│
+├── sucursales/                     # Sucursales de la cadena
+│   ├── __init__.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── views.py
+│   ├── urls.py
+│   └── migrations/
+│
+├── asistencia/                    # Registro de marcajes
+│   ├── __init__.py
+│   ├── models.py
+│   ├── views.py
+│   ├── urls.py
+│   └── migrations/
+│
+├── nomina/                        # Cálculo y consulta de nómina
+│   ├── __init__.py
+│   ├── models.py
+│   ├── services.py
+│   ├── views.py
+│   ├── urls.py
+│   └── migrations/
+│
+├── reglas_laborales/              # Reglas por país y días festivos
+│   ├── __init__.py
+│   ├── regla_laboral.py
+│   ├── dia_festivo.py
+│   ├── models.py                  # Re-exporta los modelos
+│   ├── serializers.py
+│   ├── permissions.py
+│   ├── views.py
+│   ├── urls.py
+│   └── migrations/
+│
+├── comprobantes/                  # Generación de comprobantes PDF
+│   ├── services.py
+│   └── views.py
+│
+├── solicitudes/                   # Vacaciones y permisos
+│   ├── __init__.py
+│   ├── models.py
+│   ├── views.py
+│   └── migrations/
+│
+└── reportes/                      # Reportes y exportaciones
+    └── views.py
+```
+
+Las carpetas `migrations/` ya están preparadas con su `__init__.py`; los
+archivos de migración se generarán con `python manage.py makemigrations`.
+La base de datos por defecto para desarrollo es SQLite; la configuración de
+PostgreSQL se encuentra documentada en `database/README.md`.
+
 ## Roadmap sugerido
 
 - [ ] Definir modelo de datos (usuarios, turnos, marcajes, nómina, sucursales)
