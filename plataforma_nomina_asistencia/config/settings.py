@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     "asistencia",
     "nomina",
     "reglas_laborales",
+    "novedades",
+    "privacidad",
     "comprobantes",
     "solicitudes",
     "reportes",

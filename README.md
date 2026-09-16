@@ -87,6 +87,7 @@ plataforma_nomina_asistencia/
 │   ├── urls.py                     # CRUD de usuarios
 │   ├── urls_auth.py                # Login y refresh JWT
 │   └── migrations/
+│       └── __init__.py
 │
 ├── sucursales/                     # Sucursales de la cadena
 │   ├── __init__.py
@@ -95,32 +96,52 @@ plataforma_nomina_asistencia/
 │   ├── views.py
 │   ├── urls.py
 │   └── migrations/
+│       └── __init__.py
 │
 ├── asistencia/                    # Registro de marcajes
 │   ├── __init__.py
 │   ├── models.py
+│   ├── serializers.py
 │   ├── views.py
 │   ├── urls.py
 │   └── migrations/
+│       └── __init__.py
+│
+├── novedades/                     # Incapacidades, licencias y permisos
+│   ├── __init__.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── views.py
+│   ├── urls.py
+│   └── migrations/
+│       └── __init__.py
 │
 ├── nomina/                        # Cálculo y consulta de nómina
 │   ├── __init__.py
 │   ├── models.py
 │   ├── services.py
+│   ├── dian/                       # Integración con la DIAN
+│   │   ├── __init__.py
+│   │   ├── generador_xml.py
+│   │   ├── firmador.py
+│   │   └── cliente_dian.py
 │   ├── views.py
 │   ├── urls.py
 │   └── migrations/
+│       └── __init__.py
 │
 ├── reglas_laborales/              # Reglas por país y días festivos
 │   ├── __init__.py
 │   ├── regla_laboral.py
 │   ├── dia_festivo.py
+│   ├── parametro_legal.py         # SMMLV y auxilio de transporte por año
 │   ├── models.py                  # Re-exporta los modelos
 │   ├── serializers.py
 │   ├── permissions.py
 │   ├── views.py
 │   ├── urls.py
 │   └── migrations/
+│       └── __init__.py
 │
 ├── comprobantes/                  # Generación de comprobantes PDF
 │   ├── services.py
@@ -131,6 +152,16 @@ plataforma_nomina_asistencia/
 │   ├── models.py
 │   ├── views.py
 │   └── migrations/
+│       └── __init__.py
+│
+├── privacidad/                    # Protección y consentimiento de datos
+│   ├── __init__.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── views.py
+│   ├── urls.py
+│   └── migrations/
+│       └── __init__.py
 │
 └── reportes/                      # Reportes y exportaciones
     └── views.py
