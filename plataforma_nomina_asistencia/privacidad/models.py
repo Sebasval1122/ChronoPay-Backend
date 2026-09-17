@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from django.utils import timezone
 
 
 class PoliticaTratamiento(models.Model):
@@ -10,8 +11,16 @@ class PoliticaTratamiento(models.Model):
     vigente = models.BooleanField(default=False)
     publicada_en = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        ordering = ["-publicada_en", "-id"]
+
     def __str__(self):
         return f"Política {self.version}"
+
+    def save(self, *args, **kwargs):
+        if self.vigente and not self.publicada_en:
+            self.publicada_en = timezone.now()
+        super().save(*args, **kwargs)
 
 
 class ConsentimientoDatos(models.Model):
@@ -29,3 +38,4 @@ class ConsentimientoDatos(models.Model):
                 name="unique_consentimiento_usuario_politica",
             )
         ]
+        ordering = ["-otorgado_en"]
