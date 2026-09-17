@@ -38,8 +38,23 @@ class DetalleNomina(models.Model):
 		related_name="detalles_nomina",
 	)
 	salario_base = models.DecimalField(max_digits=14, decimal_places=2, default=0)
-	horas_extra = models.DecimalField(max_digits=8, decimal_places=2, default=0)
-	recargos = models.DecimalField(max_digits=14, decimal_places=2, default=0)
+
+	# Desglose de horas trabajadas en el período, según los marcajes de asistencia
+	horas_ordinarias_diurnas = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+	horas_ordinarias_nocturnas = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+	horas_extra_diurnas = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+	horas_extra_nocturnas = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+	horas_dominicales_o_festivas = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+	horas_extra_dominicales_o_festivas = models.DecimalField(max_digits=8, decimal_places=2, default=0)
+	horas_extra = models.DecimalField(
+		max_digits=8, decimal_places=2, default=0,
+		help_text="Total de horas extra del período (suma de todos los tipos anteriores)"
+	)
+
+	recargos = models.DecimalField(
+		max_digits=14, decimal_places=2, default=0,
+		help_text="Valor monetario total de recargos y horas extra sobre el salario base"
+	)
 	retencion_fuente = models.DecimalField(max_digits=14, decimal_places=2, default=0)
 	novedades = models.DecimalField(max_digits=14, decimal_places=2, default=0)
 	total_neto = models.DecimalField(max_digits=14, decimal_places=2, default=0)
