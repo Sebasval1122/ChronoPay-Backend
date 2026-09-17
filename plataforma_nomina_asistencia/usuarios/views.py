@@ -1,5 +1,5 @@
 from django.db import transaction
-from rest_framework import viewsets, status
+from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -36,7 +36,7 @@ class UsuarioViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(sucursal=user.sucursal)
         return queryset
 
-    @action(detail=False, methods=["get"], permission_classes=[])
+    @action(detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
         """Devuelve la información del usuario autenticado."""
         serializer = UsuarioSerializer(request.user)

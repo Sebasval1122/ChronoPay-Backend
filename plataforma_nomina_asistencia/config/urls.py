@@ -9,7 +9,7 @@ urlpatterns = [
     path("api/usuarios/", include("usuarios.urls")),
     path("api/sucursales/", include("sucursales.urls")),
     path("api/registro/", include("registro.urls")),
-    path("api/asistencia/", include("registro.urls")),
+    path("api/asistencia/", include("asistencia.urls")),
     path("api/nomina/", include("nomina.urls")),
     path("api/reglas-laborales/", include("reglas_laborales.urls")),
     path("api/novedades/", include("novedades.urls")),
