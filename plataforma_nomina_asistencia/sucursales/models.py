@@ -4,6 +4,13 @@ from django.db import models
 class Sucursal(models.Model):
     """Sucursal o punto de venta dentro de la cadena del negocio."""
 
+    empresa = models.ForeignKey(
+        "empresas.Empresa",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="sucursales",
+    )
     nombre = models.CharField(max_length=150)
     codigo = models.CharField(max_length=30, unique=True)
     direccion = models.CharField(max_length=255, blank=True)
