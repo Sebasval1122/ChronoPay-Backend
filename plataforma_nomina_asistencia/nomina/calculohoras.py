@@ -162,7 +162,7 @@ def calcular_horas_marcaje(marcaje, regla) -> DesgloseHoras:
 def calcular_horas_periodo(empleado, periodo_inicio, periodo_fin, regla) -> DesgloseHoras:
     """Suma el desglose de horas de todos los marcajes cerrados del
     empleado dentro del período [periodo_inicio, periodo_fin]."""
-    from registro.models import Marcaje
+    from asistencia.models import Marcaje
 
     total = DesgloseHoras()
     marcajes = Marcaje.objects.filter(

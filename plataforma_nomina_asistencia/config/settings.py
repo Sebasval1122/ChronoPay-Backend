@@ -35,6 +35,8 @@ INSTALLED_APPS = [
     "corsheaders",
     "usuarios",
     "sucursales",
+    "asistencia",
+    # Compatibilidad para las migraciones históricas de asistencia.
     "registro",
     "nomina",
     "reglas_laborales",

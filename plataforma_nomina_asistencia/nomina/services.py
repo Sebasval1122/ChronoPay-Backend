@@ -28,7 +28,7 @@ def calcular_ajuste_novedades(empleado, periodo_inicio, periodo_fin):
 	no afectan el pago; ajustar aquí cuando se defina la regla de
 	descuento/reconocimiento exacta por tipo de novedad.
 	"""
-	from novedades.models import Incapacidad, Licencia, Permiso
+	from novedades.models import Incapacidad
 
 	dias_incapacidad = sum(
 		(min(inc.fecha_fin, periodo_fin) - max(inc.fecha_inicio, periodo_inicio)).days + 1
@@ -66,7 +66,7 @@ def generar_nomina(nomina):
 		valor_hora = calcular_valor_hora_ordinaria(salario, regla)
 		recargos = calcular_valor_recargos(desglose, valor_hora, regla)
 
-		ajuste_novedades, dias_incapacidad = calcular_ajuste_novedades(
+		ajuste_novedades, _ = calcular_ajuste_novedades(
 			empleado, nomina.periodo_inicio, nomina.periodo_fin
 		)
 
