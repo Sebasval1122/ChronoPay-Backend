@@ -9,7 +9,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from asistencia.models import Marcaje
-from nomina.calculohoras import calcular_horas_marcaje
+from nomina.calculo_horas import calcular_horas_marcaje
 from nomina.dian.cliente_dian import enviar_documento
 from nomina.dian.firmador import firmar_documento
 from nomina.dian.generador_xml import generar_documento_soporte

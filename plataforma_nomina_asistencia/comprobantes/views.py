@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
+from common.permissions import is_admin_or_same_branch
 from nomina.models import DetalleNomina
 
 from .services import generar_comprobante_pdf
@@ -17,6 +18,6 @@ class ComprobanteDetalleView(APIView):
 		)
 		if request.user.rol == "empleado" and detalle.usuario_id != request.user.id:
 			return self.permission_denied(request)
-		if request.user.rol == "gerente_sucursal" and detalle.nomina.sucursal_id != request.user.sucursal_id:
+		if not is_admin_or_same_branch(request.user, detalle.nomina.sucursal_id) and request.user.rol != "empleado":
 			return self.permission_denied(request)
 		return generar_comprobante_pdf(detalle)

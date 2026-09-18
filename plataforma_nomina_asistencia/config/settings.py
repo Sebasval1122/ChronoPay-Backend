@@ -3,6 +3,7 @@
 from datetime import timedelta
 import os
 from pathlib import Path
+from django.core.exceptions import ImproperlyConfigured
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,8 +20,10 @@ def get_env_list(name: str, default: str = "") -> list[str]:
     return [item.strip() for item in raw_value.split(",") if item.strip()]
 
 
-SECRET_KEY = os.getenv("SECRET_KEY", "cambia-esta-clave-en-produccion")
-DEBUG = get_env_bool("DEBUG", True)
+SECRET_KEY = os.getenv("SECRET_KEY")
+if not SECRET_KEY:
+     raise ImproperlyConfigured("SECRET_KEY debe definirse mediante una variable de entorno.")
+DEBUG = get_env_bool("DEBUG", False)
 ALLOWED_HOSTS = get_env_list("ALLOWED_HOSTS", "localhost,127.0.0.1")
 
 INSTALLED_APPS = [
@@ -37,8 +40,6 @@ INSTALLED_APPS = [
     "usuarios",
     "sucursales",
     "asistencia",
-    # Compatibilidad para las migraciones históricas de asistencia.
-    "registro",
     "nomina",
     "reglas_laborales",
     "novedades",
