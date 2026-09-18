@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from common.permissions import is_admin_or_same_branch
 from .models import DetalleNomina, Nomina
 from .services import generar_nomina
 
@@ -16,7 +17,7 @@ class DetalleNominaSerializer(serializers.ModelSerializer):
 
 
 class NominaSerializer(serializers.ModelSerializer):
-	detalles = DetalleNominaSerializer(many=True, read_only=True)
+	detalles = serializers.SerializerMethodField()
 
 	class Meta:
 		model = Nomina
@@ -30,6 +31,13 @@ class NominaSerializer(serializers.ModelSerializer):
 		if attrs["periodo_fin"] < attrs["periodo_inicio"]:
 			raise serializers.ValidationError("El período final no puede ser anterior al inicial.")
 		return attrs
+
+	def get_detalles(self, nomina):
+		detalles = nomina.detalles.all()
+		request = self.context.get("request")
+		if request and request.user.rol == "empleado":
+			detalles = detalles.filter(usuario=request.user)
+		return DetalleNominaSerializer(detalles, many=True, context=self.context).data
 
 
 class NominaViewSet(viewsets.ModelViewSet):
@@ -49,7 +57,7 @@ class NominaViewSet(viewsets.ModelViewSet):
 		if self.request.user.rol not in {"admin_general", "gerente_sucursal"}:
 			raise serializers.ValidationError("Solo un administrador o gerente puede crear nóminas.")
 		sucursal = serializer.validated_data["sucursal"]
-		if self.request.user.rol == "gerente_sucursal" and sucursal.pk != self.request.user.sucursal_id:
+		if not is_admin_or_same_branch(self.request.user, sucursal.pk):
 			raise serializers.ValidationError("Solo puedes crear nóminas de tu sucursal.")
 		serializer.save()
 

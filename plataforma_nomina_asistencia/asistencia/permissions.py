@@ -1,5 +1,7 @@
 from rest_framework.permissions import BasePermission
 
+from common.permissions import is_admin_or_same_branch
+
 
 class PuedeGestionarMarcaje(BasePermission):
 	def has_permission(self, request, view):
@@ -7,10 +9,5 @@ class PuedeGestionarMarcaje(BasePermission):
 
 	def has_object_permission(self, request, view, obj):
 		if view.action in {"corregir", "partial_update", "update", "destroy"}:
-			if request.user.rol == "admin_general":
-				return True
-			return (
-				request.user.rol == "gerente_sucursal"
-				and obj.sucursal_id == request.user.sucursal_id
-			)
+			return is_admin_or_same_branch(request.user, obj.sucursal_id)
 		return obj.empleado_id == request.user.id

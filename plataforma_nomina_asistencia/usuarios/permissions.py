@@ -1,5 +1,7 @@
 from rest_framework import permissions
 
+from common.permissions import is_admin_or_same_branch
+
 
 class EsAdminOGerente(permissions.BasePermission):
     def has_permission(self, request, view):
@@ -11,9 +13,6 @@ class EsAdminOGerente(permissions.BasePermission):
 
 class EsPropioUsuarioOAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        if obj.pk == request.user.pk or request.user.rol == "admin_general":
+        if obj.pk == request.user.pk:
             return True
-        return (
-            request.user.rol == "gerente_sucursal"
-            and obj.sucursal_id == request.user.sucursal_id
-        )
+        return is_admin_or_same_branch(request.user, obj.sucursal_id)

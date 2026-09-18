@@ -4,7 +4,7 @@ from decimal import Decimal
 
 from django.db import transaction
 
-from .calculohoras import (
+from .calculo_horas import (
 	calcular_horas_periodo,
 	calcular_valor_hora_ordinaria,
 	calcular_valor_recargos,

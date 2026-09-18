@@ -4,6 +4,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from common.permissions import is_admin_or_same_branch
 from .models import EstadoSolicitud, Solicitud
 
 
@@ -57,7 +58,7 @@ class SolicitudViewSet(viewsets.ModelViewSet):
 		if request.user.rol not in {"admin_general", "gerente_sucursal"}:
 			return Response({"detail": "No tienes permisos para resolver solicitudes."}, status=403)
 		solicitud = self.get_object()
-		if request.user.rol == "gerente_sucursal" and solicitud.solicitante.sucursal_id != request.user.sucursal_id:
+		if not is_admin_or_same_branch(request.user, solicitud.solicitante.sucursal_id):
 			return Response({"detail": "La solicitud no pertenece a tu sucursal."}, status=403)
 		estado = request.data.get("estado")
 		if estado not in {EstadoSolicitud.APROBADA, EstadoSolicitud.RECHAZADA}:

@@ -8,12 +8,11 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ("registro", "0002_initial"),
         ("sucursales", "0001_initial"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
-    state_operations = [
+    operations = [
         migrations.CreateModel(
             name="Marcaje",
             fields=[
@@ -37,12 +36,5 @@ class Migration(migrations.Migration):
                     models.Index(fields=["sucursal", "fecha"], name="asistencia_sucursal_fecha_idx"),
                 ],
             },
-        ),
-    ]
-
-    operations = [
-        migrations.SeparateDatabaseAndState(
-            state_operations=state_operations,
-            database_operations=[],
         ),
     ]
