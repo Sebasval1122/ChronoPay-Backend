@@ -191,6 +191,7 @@ Postgres se encuentra documentada en `database/README.md`.
 - [x] Implementar generación de comprobantes en PDF
 - [x] Implementar módulo de vacaciones/permisos (API — falta la pantalla en el frontend)
 - [x] Registro público multi-empresa, seguro (rol fijado por el servidor)
+- [x] Integración end-to-end confirmada con el frontend (registro → login → asistencia → nómina)
 - [ ] Conectar en el frontend: solicitudes, historial salarial, reportes CSV
 - [ ] Dashboard consolidado multi-sucursal
 - [ ] Dashboard de costos de nómina proyectados vs. reales
@@ -203,3 +204,4 @@ Postgres se encuentra documentada en `database/README.md`.
 
 ---
 
+*Este README describe el alcance funcional del proyecto y su estado real. La arquitectura de producción (hosting, HTTPS, base de datos gestionada) se definirá en una siguiente etapa.*
