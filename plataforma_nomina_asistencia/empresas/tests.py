@@ -291,6 +291,48 @@ class SolicitudesNominaSalidasTests(DatosBaseTests):
         self.assertEqual(self.nomina.estado, "generada")
         self.assertEqual(self.nomina.detalles.count(), 3)
 
+    def test_empleado_solo_ve_su_detalle_de_nomina(self):
+        otro_empleado = Usuario.objects.create_user(
+            username="otro_empleado_nomina",
+            email="otro-empleado@cadena.test",
+            password="UnaPasswordSegura-2026!",
+            rol=Rol.EMPLEADO,
+            sucursal=self.sucursal,
+        )
+        DetalleNomina.objects.create(
+            nomina=self.nomina,
+            usuario=self.empleado,
+            salario_base=Decimal("3000000"),
+        )
+        DetalleNomina.objects.create(
+            nomina=self.nomina,
+            usuario=otro_empleado,
+            salario_base=Decimal("5000000"),
+        )
+
+        self.autenticar(self.empleado)
+        lista = self.client.get("/api/nomina/")
+        detalle = self.client.get(f"/api/nomina/{self.nomina.id}/")
+
+        for respuesta in (lista, detalle):
+            self.assertEqual(respuesta.status_code, status.HTTP_200_OK)
+            if isinstance(respuesta.data, dict) and "results" in respuesta.data:
+                nominas = respuesta.data["results"]
+            elif isinstance(respuesta.data, dict):
+                nominas = [respuesta.data]
+            else:
+                nominas = respuesta.data
+            detalles = nominas[0]["detalles"]
+            self.assertEqual(len(detalles), 1)
+            self.assertEqual(detalles[0]["usuario"], self.empleado.id)
+            self.assertEqual(detalles[0]["salario_base"], "3000000.00")
+            self.assertNotIn("5000000.00", str(respuesta.data))
+
+        self.autenticar(self.gerente)
+        respuesta_gerente = self.client.get(f"/api/nomina/{self.nomina.id}/")
+        self.assertEqual(respuesta_gerente.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(respuesta_gerente.data["detalles"]), 2)
+
     def test_comprobante_pdf_y_reporte_csv(self):
         detalle = DetalleNomina.objects.create(
             nomina=self.nomina, usuario=self.empleado, salario_base=Decimal("3000000"),
