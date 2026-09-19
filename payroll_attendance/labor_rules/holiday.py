@@ -1,24 +1,24 @@
 from django.db import models
 
-from .regla_laboral import ReglaLaboral
+from .labor_rule import LaborRule
 
 
-class DiaFestivo(models.Model):
-    """Días festivos asociados a una regla laboral por país."""
+class Holiday(models.Model):
+    """Días festivos asociados a una labor_rule laboral por país."""
 
-    regla_laboral = models.ForeignKey(
-        ReglaLaboral,
+    labor_rule = models.ForeignKey(
+        LaborRule,
         on_delete=models.CASCADE,
         related_name="dias_festivos",
     )
-    fecha = models.DateField()
-    descripcion = models.CharField(max_length=150, blank=True)
+    date = models.DateField()
+    description = models.CharField(max_length=150, blank=True)
 
     class Meta:
         verbose_name = "Día festivo"
         verbose_name_plural = "Días festivos"
-        unique_together = ("regla_laboral", "fecha")
-        ordering = ["fecha"]
+        unique_together = ("labor_rule", "date")
+        ordering = ["date"]
 
     def __str__(self):
-        return f"{self.fecha} - {self.descripcion} ({self.regla_laboral.pais})"
+        return f"{self.date} - {self.description} ({self.labor_rule.country})"

@@ -1,5 +1,5 @@
-from .regla_laboral import ReglaLaboral
-from .dia_festivo import DiaFestivo
-from .parametro_legal import ParametroLegal
+from .labor_rule import LaborRule
+from .holiday import Holiday
+from .legal_parameter import LegalParameter
 
-__all__ = ["ReglaLaboral", "DiaFestivo", "ParametroLegal"]
+__all__ = ["LaborRule", "Holiday", "LegalParameter"]

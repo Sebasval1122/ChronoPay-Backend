@@ -1,60 +1,60 @@
 from django.contrib.auth.password_validation import validate_password
 from rest_framework import serializers
-from .models import Usuario, HistorialSalarial
+from .models import User, SalaryHistory
 
 
-class UsuarioSerializer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Usuario
+        model = User
         fields = [
             "id", "username", "first_name", "last_name", "email",
-            "cedula", "telefono", "rol", "sucursal", "salario_actual",
-            "activo", "date_joined",
+            "national_id", "phone", "rol", "branch", "current_salary",
+            "active", "date_joined",
         ]
         read_only_fields = ["date_joined"]
 
 
-class CrearUsuarioSerializer(serializers.ModelSerializer):
-    """Serializer usado solo al crear un usuario (recibe password)."""
+class CreateUserSerializer(serializers.ModelSerializer):
+    """Serializer usado solo al crear un user (recibe password)."""
 
     password = serializers.CharField(write_only=True, validators=[validate_password])
 
     class Meta:
-        model = Usuario
+        model = User
         fields = [
             "id", "username", "password", "first_name", "last_name", "email",
-            "cedula", "telefono", "rol", "sucursal", "salario_actual",
+            "national_id", "phone", "rol", "branch", "current_salary",
         ]
 
     def create(self, validated_data):
         password = validated_data.pop("password")
-        usuario = Usuario(**validated_data)
-        usuario.set_password(password)
-        usuario.save()
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
 
         # Si se crea con un salario inicial, se deja registrado en el historial
-        if usuario.salario_actual is not None:
-            HistorialSalarial.objects.create(
-                usuario=usuario,
-                salario_anterior=None,
-                salario_nuevo=usuario.salario_actual,
-                motivo="Salario inicial al crear el usuario",
+        if user.current_salary is not None:
+            SalaryHistory.objects.create(
+                user=user,
+                previous_salary=None,
+                new_salary=user.current_salary,
+                reason="Salario inicial al crear el user",
             )
-        return usuario
+        return user
 
 
-class CambiarSalarioSerializer(serializers.Serializer):
+class ChangeSalarySerializer(serializers.Serializer):
     """Serializer para el endpoint de cambio de salario."""
 
-    salario_nuevo = serializers.DecimalField(max_digits=12, decimal_places=2)
-    motivo = serializers.CharField(max_length=255, required=False, allow_blank=True)
+    new_salary = serializers.DecimalField(max_digits=12, decimal_places=2)
+    reason = serializers.CharField(max_length=255, required=False, allow_blank=True)
 
 
-class HistorialSalarialSerializer(serializers.ModelSerializer):
+class SalaryHistorySerializer(serializers.ModelSerializer):
     class Meta:
-        model = HistorialSalarial
+        model = SalaryHistory
         fields = [
-            "id", "usuario", "salario_anterior", "salario_nuevo",
-            "fecha_cambio", "motivo", "registrado_por",
+            "id", "user", "previous_salary", "new_salary",
+            "change_date", "reason", "recorded_by",
         ]
         read_only_fields = fields

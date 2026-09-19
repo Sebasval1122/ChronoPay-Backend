@@ -1,11 +1,11 @@
 from rest_framework import permissions, viewsets
 
-from .models import ConsentimientoDatos, PoliticaTratamiento
+from .models import DataConsent, DataPolicy
 from .serializers import ConsentimientoDatosSerializer, PoliticaTratamientoSerializer
 
 
 class PoliticaTratamientoViewSet(viewsets.ModelViewSet):
-    queryset = PoliticaTratamiento.objects.all()
+    queryset = DataPolicy.objects.all()
     serializer_class = PoliticaTratamientoSerializer
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ["get", "post", "patch", "head", "options"]
@@ -32,16 +32,16 @@ class PoliticaTratamientoViewSet(viewsets.ModelViewSet):
 
 
 class ConsentimientoDatosViewSet(viewsets.ModelViewSet):
-    queryset = ConsentimientoDatos.objects.all()
+    queryset = DataConsent.objects.all()
     serializer_class = ConsentimientoDatosSerializer
     permission_classes = [permissions.IsAuthenticated]
     http_method_names = ["get", "post", "patch", "head", "options"]
 
     def get_queryset(self):
-        return super().get_queryset().filter(usuario=self.request.user)
+        return super().get_queryset().filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(usuario=self.request.user)
+        serializer.save(user=self.request.user)
 
     def perform_update(self, serializer):
-        serializer.save(usuario=self.request.user)
+        serializer.save(user=self.request.user)

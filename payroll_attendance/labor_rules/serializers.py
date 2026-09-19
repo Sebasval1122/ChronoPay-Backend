@@ -1,35 +1,35 @@
 from rest_framework import serializers
-from .models import ReglaLaboral, DiaFestivo
+from .models import LaborRule, Holiday
 
 
-class DiaFestivoSerializer(serializers.ModelSerializer):
+class HolidaySerializer(serializers.ModelSerializer):
     class Meta:
-        model = DiaFestivo
-        fields = ["id", "regla_laboral", "fecha", "descripcion"]
+        model = Holiday
+        fields = ["id", "labor_rule", "date", "description"]
 
 
-class ReglaLaboralSerializer(serializers.ModelSerializer):
-    dias_festivos = DiaFestivoSerializer(many=True, read_only=True)
+class LaborRuleSerializer(serializers.ModelSerializer):
+    dias_festivos = HolidaySerializer(many=True, read_only=True)
 
     class Meta:
-        model = ReglaLaboral
+        model = LaborRule
         fields = [
             "id",
-            "pais",
-            "hora_inicio_diurno",
-            "hora_inicio_nocturno",
-            "recargo_hora_extra_diurna",
-            "recargo_hora_extra_nocturna",
-            "recargo_nocturno",
-            "recargo_dominical_o_festivo",
-            "recargo_nocturno_dominical_o_festivo",
-            "recargo_hora_extra_dominical_o_festivo",
-            "recargo_hora_extra_nocturna_dominical_o_festivo",
-            "horas_maximas_semanales",
-            "horas_maximas_diarias_ordinarias",
-            "activo",
+            "country",
+            "daytime_start",
+            "nighttime_start",
+            "daytime_overtime_rate",
+            "nighttime_overtime_rate",
+            "nighttime_rate",
+            "sunday_holiday_rate",
+            "sunday_holiday_night_rate",
+            "sunday_holiday_overtime_rate",
+            "nighttime_overtime_rate_dominical_o_festivo",
+            "max_weekly_hours",
+            "max_daily_regular_hours",
+            "active",
             "dias_festivos",
-            "creado_en",
-            "actualizado_en",
+            "created_at",
+            "updated_at",
         ]
-        read_only_fields = ["creado_en", "actualizado_en"]
+        read_only_fields = ["created_at", "updated_at"]

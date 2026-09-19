@@ -1,1 +1,1 @@
-"""Aplicación de usuarios y autenticación."""
+"""Aplicación de users y autenticación."""

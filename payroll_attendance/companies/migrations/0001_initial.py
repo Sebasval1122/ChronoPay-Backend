@@ -12,19 +12,19 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Empresa',
+            name='Company',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nombre', models.CharField(max_length=150)),
-                ('nit_o_identificacion', models.CharField(blank=True, max_length=50)),
-                ('email_contacto', models.EmailField(max_length=254)),
+                ('name', models.CharField(max_length=150)),
+                ('tax_id_or_identification', models.CharField(blank=True, max_length=50)),
+                ('contact_email', models.EmailField(max_length=254)),
                 ('activa', models.BooleanField(default=True)),
-                ('creado_en', models.DateTimeField(auto_now_add=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'verbose_name': 'Empresa',
+                'verbose_name': 'Company',
                 'verbose_name_plural': 'Empresas',
-                'ordering': ['nombre'],
+                'ordering': ['name'],
             },
         ),
     ]

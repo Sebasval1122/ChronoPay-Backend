@@ -1,17 +1,17 @@
 from django.db import models
 
 
-class ParametroLegal(models.Model):
+class LegalParameter(models.Model):
     """Valores legales variables por país y año."""
 
-    regla_laboral = models.ForeignKey(
-        "reglas_laborales.ReglaLaboral",
+    labor_rule = models.ForeignKey(
+        "labor_rules.LaborRule",
         on_delete=models.CASCADE,
         related_name="parametros_legales",
     )
-    anio = models.PositiveIntegerField()
-    smmlv = models.DecimalField(max_digits=12, decimal_places=2)
-    auxilio_transporte = models.DecimalField(
+    year = models.PositiveIntegerField()
+    minimum_wage = models.DecimalField(max_digits=12, decimal_places=2)
+    transport_allowance = models.DecimalField(
         max_digits=12,
         decimal_places=2,
         default=0,
@@ -20,13 +20,13 @@ class ParametroLegal(models.Model):
     class Meta:
         verbose_name = "Parámetro legal"
         verbose_name_plural = "Parámetros legales"
-        ordering = ["-anio"]
+        ordering = ["-year"]
         constraints = [
             models.UniqueConstraint(
-                fields=["regla_laboral", "anio"],
-                name="unique_parametro_legal_por_anio",
+                fields=["labor_rule", "year"],
+                name="unique_parametro_legal_por_year",
             )
         ]
 
     def __str__(self):
-        return f"{self.regla_laboral.pais} - {self.anio}"
+        return f"{self.labor_rule.country} - {self.year}"

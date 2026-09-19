@@ -1,1 +1,1 @@
-"""Migraciones de privacidad."""
+"""Migraciones de privacy."""

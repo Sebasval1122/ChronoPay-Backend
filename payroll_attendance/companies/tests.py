@@ -8,31 +8,31 @@ from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from asistencia.models import Marcaje
-from nomina.calculo_horas import calcular_horas_marcaje
-from nomina.dian.cliente_dian import enviar_documento
-from nomina.dian.firmador import firmar_documento
-from nomina.dian.generador_xml import generar_documento_soporte
-from nomina.models import DetalleNomina, Nomina
-from novedades.models import Incapacidad
-from privacidad.models import ConsentimientoDatos, PoliticaTratamiento
-from reglas_laborales.models import ReglaLaboral
-from solicitudes.models import EstadoSolicitud, Solicitud, TipoSolicitud
-from sucursales.models import Sucursal
-from usuarios.models import Rol, Usuario
+from attendance.models import AttendanceRecord
+from payroll.hours_calculation import calculate_attendance_hours
+from payroll.dian.dian_client import send_document
+from payroll.dian.signer import sign_document
+from payroll.dian.xml_generator import generate_support_document
+from payroll.models import PayrollDetail, Payroll
+from work_events.models import SickLeave
+from privacy.models import DataConsent, DataPolicy
+from labor_rules.models import LaborRule
+from time_off_requests.models import RequestStatus, Request, RequestType
+from branches.models import Branch
+from users.models import Role, User
 
-from .models import Empresa
+from .models import Company
 
 
 class RegistroEmpresaTests(APITestCase):
-    url = "/api/empresas/registro/"
+    url = "/api/companies/registro/"
 
     def setUp(self):
         cache.clear()
         self.datos = {
-            "nombre_empresa": "Cadena de Prueba",
-            "nombre_admin": "Ana",
-            "apellido_admin": "García",
+            "company_name": "Cadena de Prueba",
+            "admin_first_name": "Ana",
+            "admin_last_name": "García",
             "email": "ana@cadena-prueba.test",
             "username": "ana_admin",
             "password": "UnaPasswordSegura-2026!",
@@ -41,29 +41,29 @@ class RegistroEmpresaTests(APITestCase):
     def test_registro_crea_empresa_sucursal_y_admin(self):
         respuesta = self.client.post(self.url, self.datos, format="json")
         self.assertEqual(respuesta.status_code, status.HTTP_201_CREATED)
-        empresa = Empresa.objects.get(pk=respuesta.data["empresa_id"])
-        sucursal = Sucursal.objects.get(pk=respuesta.data["sucursal_id"])
-        usuario = Usuario.objects.get(pk=respuesta.data["usuario_id"])
-        self.assertEqual(sucursal.empresa, empresa)
-        self.assertEqual(sucursal.nombre, "Principal")
-        self.assertTrue(sucursal.codigo.startswith("PRINCIPAL-"))
-        self.assertEqual(usuario.rol, Rol.ADMIN_GENERAL)
-        self.assertEqual(usuario.sucursal, sucursal)
-        self.assertTrue(usuario.check_password(self.datos["password"]))
+        company = Company.objects.get(pk=respuesta.data["company_id"])
+        branch = Branch.objects.get(pk=respuesta.data["branch_id"])
+        user = User.objects.get(pk=respuesta.data["user_id"])
+        self.assertEqual(branch.company, company)
+        self.assertEqual(branch.name, "Principal")
+        self.assertTrue(branch.codigo.startswith("PRINCIPAL-"))
+        self.assertEqual(user.rol, Role.ADMIN_GENERAL)
+        self.assertEqual(user.branch, branch)
+        self.assertTrue(user.check_password(self.datos["password"]))
 
     def test_registro_rechaza_campos_privilegiados(self):
-        datos = {**self.datos, "rol": Rol.ADMIN_GENERAL, "sucursal": 1}
+        datos = {**self.datos, "rol": Role.ADMIN_GENERAL, "branch": 1}
         respuesta = self.client.post(self.url, datos, format="json")
         self.assertEqual(respuesta.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn("campos no permitidos", str(respuesta.data).lower())
-        self.assertEqual(Empresa.objects.count(), 0)
+        self.assertEqual(Company.objects.count(), 0)
 
     def test_registro_rechaza_password_debil_y_duplicados(self):
         debil = self.client.post(
             self.url, {**self.datos, "password": "123"}, format="json"
         )
         self.assertEqual(debil.status_code, status.HTTP_400_BAD_REQUEST)
-        Usuario.objects.create_user(
+        User.objects.create_user(
             username=self.datos["username"],
             email=self.datos["email"],
             password=self.datos["password"],
@@ -89,33 +89,33 @@ class RegistroEmpresaTests(APITestCase):
 
 class DatosBaseTests(APITestCase):
     def setUp(self):
-        self.empresa = Empresa.objects.create(
-            nombre="Cadena Base", email_contacto="base@cadena.test"
+        self.company = Company.objects.create(
+            name="Cadena Base", contact_email="base@cadena.test"
         )
-        self.sucursal = Sucursal.objects.create(
-            empresa=self.empresa, nombre="Principal", codigo="BASE-001"
+        self.branch = Branch.objects.create(
+            company=self.company, name="Principal", codigo="BASE-001"
         )
-        self.otra_sucursal = Sucursal.objects.create(
-            empresa=self.empresa, nombre="Norte", codigo="BASE-002"
+        self.otra_sucursal = Branch.objects.create(
+            company=self.company, name="Norte", codigo="BASE-002"
         )
-        self.admin = Usuario.objects.create_user(
+        self.admin = User.objects.create_user(
             username="admin_base", email="admin@cadena.test",
-            password="UnaPasswordSegura-2026!", rol=Rol.ADMIN_GENERAL,
-            sucursal=self.sucursal,
+            password="UnaPasswordSegura-2026!", rol=Role.ADMIN_GENERAL,
+            branch=self.branch,
         )
-        self.gerente = Usuario.objects.create_user(
+        self.gerente = User.objects.create_user(
             username="gerente_base", email="gerente@cadena.test",
-            password="UnaPasswordSegura-2026!", rol=Rol.GERENTE_SUCURSAL,
-            sucursal=self.sucursal,
+            password="UnaPasswordSegura-2026!", rol=Role.GERENTE_SUCURSAL,
+            branch=self.branch,
         )
-        self.empleado = Usuario.objects.create_user(
-            username="empleado_base", email="empleado@cadena.test",
-            password="UnaPasswordSegura-2026!", rol=Rol.EMPLEADO,
-            sucursal=self.sucursal, salario_actual=Decimal("3000000"),
+        self.employee = User.objects.create_user(
+            username="empleado_base", email="employee@cadena.test",
+            password="UnaPasswordSegura-2026!", rol=Role.EMPLEADO,
+            branch=self.branch, current_salary=Decimal("3000000"),
         )
 
-    def autenticar(self, usuario):
-        self.client.force_authenticate(user=usuario)
+    def autenticar(self, user):
+        self.client.force_authenticate(user=user)
 
 
 class AutenticacionUsuariosTests(DatosBaseTests):
@@ -137,70 +137,70 @@ class AutenticacionUsuariosTests(DatosBaseTests):
         )
 
     def test_empleado_solo_consulta_su_me(self):
-        self.autenticar(self.empleado)
-        me = self.client.get("/api/usuarios/me/")
-        lista = self.client.get("/api/usuarios/")
+        self.autenticar(self.employee)
+        me = self.client.get("/api/users/me/")
+        lista = self.client.get("/api/users/")
         self.assertEqual(me.status_code, status.HTTP_200_OK)
-        self.assertEqual(me.data["username"], self.empleado.username)
+        self.assertEqual(me.data["username"], self.employee.username)
         self.assertEqual(lista.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_admin_crea_usuario_y_cambia_salario(self):
         self.autenticar(self.admin)
         crear = self.client.post(
-            "/api/usuarios/",
+            "/api/users/",
             {
                 "username": "nuevo_empleado", "password": "OtraPasswordSegura-2026!",
                 "first_name": "Nuevo", "last_name": "Empleado",
-                "email": "nuevo@cadena.test", "rol": Rol.EMPLEADO,
-                "sucursal": self.sucursal.id,
+                "email": "nuevo@cadena.test", "rol": Role.EMPLEADO,
+                "branch": self.branch.id,
             }, format="json",
         )
         self.assertEqual(crear.status_code, status.HTTP_201_CREATED)
-        nuevo = Usuario.objects.get(username="nuevo_empleado")
+        nuevo = User.objects.get(username="nuevo_empleado")
         self.assertTrue(nuevo.check_password("OtraPasswordSegura-2026!"))
         cambio = self.client.post(
-            f"/api/usuarios/{self.empleado.id}/cambiar_salario/",
-            {"salario_nuevo": "3500000", "motivo": "Ajuste"}, format="json",
+            f"/api/users/{self.employee.id}/cambiar_salario/",
+            {"new_salary": "3500000", "reason": "Ajuste"}, format="json",
         )
         self.assertEqual(cambio.status_code, status.HTTP_200_OK)
-        self.empleado.refresh_from_db()
-        self.assertEqual(self.empleado.salario_actual, Decimal("3500000.00"))
-        self.assertTrue(self.empleado.historial_salarial.filter(motivo="Ajuste").exists())
+        self.employee.refresh_from_db()
+        self.assertEqual(self.employee.current_salary, Decimal("3500000.00"))
+        self.assertTrue(self.employee.historial_salarial.filter(reason="Ajuste").exists())
 
 
 class SucursalesAsistenciaTests(DatosBaseTests):
     def test_crud_sucursal_y_codigo_unico(self):
         self.autenticar(self.admin)
         crear = self.client.post(
-            "/api/sucursales/", {"nombre": "Sur", "codigo": "BASE-003"}, format="json"
+            "/api/branches/", {"name": "Sur", "codigo": "BASE-003"}, format="json"
         )
         duplicada = self.client.post(
-            "/api/sucursales/", {"nombre": "Duplicada", "codigo": "BASE-001"}, format="json"
+            "/api/branches/", {"name": "Duplicada", "codigo": "BASE-001"}, format="json"
         )
         self.assertEqual(crear.status_code, status.HTTP_201_CREATED)
         self.assertEqual(duplicada.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_entrada_salida_y_marcaje_abierto_unico(self):
-        self.autenticar(self.empleado)
-        entrada = self.client.post("/api/asistencia/marcajes/marcar-entrada/")
-        repetida = self.client.post("/api/asistencia/marcajes/marcar-entrada/")
-        salida = self.client.post(
-            f"/api/asistencia/marcajes/{entrada.data['id']}/marcar-salida/"
+        self.autenticar(self.employee)
+        clock_in_time = self.client.post("/api/attendance/marcajes/clock-in/")
+        repetida = self.client.post("/api/attendance/marcajes/clock-in/")
+        clock_out_time = self.client.post(
+            f"/api/attendance/marcajes/{clock_in_time.data['id']}/clock-out/"
         )
-        self.assertEqual(entrada.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(clock_in_time.status_code, status.HTTP_201_CREATED)
         self.assertEqual(repetida.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(salida.status_code, status.HTTP_200_OK)
-        self.assertEqual(salida.data["horas_trabajadas"], 0.0)
+        self.assertEqual(clock_out_time.status_code, status.HTTP_200_OK)
+        self.assertEqual(clock_out_time.data["worked_hours"], 0.0)
 
     def test_empleado_no_corrige_marcaje(self):
-        marcaje = Marcaje.objects.create(
-            empleado=self.empleado, sucursal=self.sucursal,
-            entrada=timezone.now() - timedelta(hours=2), salida=timezone.now(),
+        marcaje = AttendanceRecord.objects.create(
+            employee=self.employee, branch=self.branch,
+            clock_in_time=timezone.now() - timedelta(hours=2), clock_out_time=timezone.now(),
         )
-        self.autenticar(self.empleado)
+        self.autenticar(self.employee)
         respuesta = self.client.patch(
-            f"/api/asistencia/marcajes/{marcaje.id}/corregir/",
-            {"motivo_correccion": "No autorizado"}, format="json",
+            f"/api/attendance/marcajes/{marcaje.id}/correct/",
+            {"correction_reason": "No autorizado"}, format="json",
         )
         self.assertEqual(respuesta.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -210,109 +210,109 @@ class ReglasNovedadesPrivacidadTests(DatosBaseTests):
         self.autenticar(self.admin)
         crear = self.client.post(
             "/api/reglas-laborales/reglas/",
-            {"pais": "Colombia", "hora_inicio_diurno": "06:00", "hora_inicio_nocturno": "19:00"},
+            {"country": "Colombia", "daytime_start": "06:00", "nighttime_start": "19:00"},
             format="json",
         )
         self.assertEqual(crear.status_code, status.HTTP_201_CREATED)
-        self.autenticar(self.empleado)
+        self.autenticar(self.employee)
         consulta = self.client.get("/api/reglas-laborales/reglas/")
         self.assertEqual(consulta.status_code, status.HTTP_200_OK)
 
     def test_novedad_se_asigna_al_usuario_autenticado(self):
-        self.autenticar(self.empleado)
+        self.autenticar(self.employee)
         respuesta = self.client.post(
-            "/api/novedades/incapacidades/",
+            "/api/work_events/sickleavees/",
             {
-                "usuario": self.empleado.id,
-                "fecha_inicio": "2026-09-10",
-                "fecha_fin": "2026-09-11",
-                "descripcion": "Reposo",
+                "user": self.employee.id,
+                "start_date": "2026-09-10",
+                "end_date": "2026-09-11",
+                "description": "Reposo",
             },
             format="json",
         )
         self.assertEqual(respuesta.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(respuesta.data["usuario"], self.empleado.id)
-        self.assertEqual(Incapacidad.objects.filter(usuario=self.empleado).count(), 1)
+        self.assertEqual(respuesta.data["user"], self.employee.id)
+        self.assertEqual(SickLeave.objects.filter(user=self.employee).count(), 1)
 
     def test_politica_vigente_y_consentimiento(self):
         self.autenticar(self.admin)
-        politica = self.client.post(
-            "/api/privacidad/politicas/",
-            {"version": "2026.1", "contenido": "Política vigente", "vigente": True},
+        policy = self.client.post(
+            "/api/privacy/politicas/",
+            {"version": "2026.1", "content": "Política vigente", "vigente": True},
             format="json",
         )
-        self.assertEqual(politica.status_code, status.HTTP_201_CREATED)
-        self.autenticar(self.empleado)
+        self.assertEqual(policy.status_code, status.HTTP_201_CREATED)
+        self.autenticar(self.employee)
         consentimiento = self.client.post(
-            "/api/privacidad/consentimientos/",
-            {"politica": politica.data["id"], "aceptado": True}, format="json",
+            "/api/privacy/consentimientos/",
+            {"policy": policy.data["id"], "aceptado": True}, format="json",
         )
         self.assertEqual(consentimiento.status_code, status.HTTP_201_CREATED)
-        self.assertTrue(ConsentimientoDatos.objects.filter(usuario=self.empleado).exists())
+        self.assertTrue(DataConsent.objects.filter(user=self.employee).exists())
 
 
 class SolicitudesNominaSalidasTests(DatosBaseTests):
     def setUp(self):
         super().setUp()
-        self.regla = ReglaLaboral.objects.create(pais="Colombia", activo=True)
-        self.nomina = Nomina.objects.create(
-            sucursal=self.sucursal, periodo_inicio=date(2026, 9, 1), periodo_fin=date(2026, 9, 30)
+        self.regla = LaborRule.objects.create(country="Colombia", active=True)
+        self.payroll = Payroll.objects.create(
+            branch=self.branch, period_start=date(2026, 9, 1), period_end=date(2026, 9, 30)
         )
 
-    def test_solicitud_se_crea_y_se_resuelve(self):
-        self.autenticar(self.empleado)
+    def test_request_se_crea_y_se_resuelve(self):
+        self.autenticar(self.employee)
         crear = self.client.post(
-            "/api/solicitudes/",
-            {"tipo": TipoSolicitud.PERMISO, "fecha_inicio": "2026-10-01", "fecha_fin": "2026-10-01", "motivo": "Cita"},
+            "/api/time_off_requests/",
+            {"type": RequestType.PERMISO, "start_date": "2026-10-01", "end_date": "2026-10-01", "reason": "Cita"},
             format="json",
         )
         self.assertEqual(crear.status_code, status.HTTP_201_CREATED)
         self.autenticar(self.gerente)
-        resolver = self.client.post(
-            f"/api/solicitudes/{crear.data['id']}/resolver/",
-            {"estado": EstadoSolicitud.APROBADA}, format="json",
+        resolve = self.client.post(
+            f"/api/time_off_requests/{crear.data['id']}/resolve/",
+            {"status": RequestStatus.APROBADA}, format="json",
         )
-        self.assertEqual(resolver.status_code, status.HTTP_200_OK)
-        self.assertEqual(resolver.data["estado"], EstadoSolicitud.APROBADA)
+        self.assertEqual(resolve.status_code, status.HTTP_200_OK)
+        self.assertEqual(resolve.data["status"], RequestStatus.APROBADA)
 
     def test_nomina_se_genera_con_detalles_y_empleado_no_la_genera(self):
-        Marcaje.objects.create(
-            empleado=self.empleado, sucursal=self.sucursal, fecha=date(2026, 9, 15),
-            entrada=timezone.make_aware(datetime(2026, 9, 15, 8, 0)),
-            salida=timezone.make_aware(datetime(2026, 9, 15, 17, 0)),
+        AttendanceRecord.objects.create(
+            employee=self.employee, branch=self.branch, date=date(2026, 9, 15),
+            clock_in_time=timezone.make_aware(datetime(2026, 9, 15, 8, 0)),
+            clock_out_time=timezone.make_aware(datetime(2026, 9, 15, 17, 0)),
         )
-        self.autenticar(self.empleado)
-        prohibida = self.client.post(f"/api/nomina/{self.nomina.id}/generar/")
+        self.autenticar(self.employee)
+        prohibida = self.client.post(f"/api/payroll/{self.payroll.id}/generar/")
         self.assertEqual(prohibida.status_code, status.HTTP_403_FORBIDDEN)
         self.autenticar(self.gerente)
-        generada = self.client.post(f"/api/nomina/{self.nomina.id}/generar/")
+        generada = self.client.post(f"/api/payroll/{self.payroll.id}/generar/")
         self.assertEqual(generada.status_code, status.HTTP_200_OK)
-        self.nomina.refresh_from_db()
-        self.assertEqual(self.nomina.estado, "generada")
-        self.assertEqual(self.nomina.detalles.count(), 3)
+        self.payroll.refresh_from_db()
+        self.assertEqual(self.payroll.status, "generada")
+        self.assertEqual(self.payroll.detalles.count(), 3)
 
     def test_empleado_solo_ve_su_detalle_de_nomina(self):
-        otro_empleado = Usuario.objects.create_user(
+        otro_empleado = User.objects.create_user(
             username="otro_empleado_nomina",
-            email="otro-empleado@cadena.test",
+            email="otro-employee@cadena.test",
             password="UnaPasswordSegura-2026!",
-            rol=Rol.EMPLEADO,
-            sucursal=self.sucursal,
+            rol=Role.EMPLEADO,
+            branch=self.branch,
         )
-        DetalleNomina.objects.create(
-            nomina=self.nomina,
-            usuario=self.empleado,
-            salario_base=Decimal("3000000"),
+        PayrollDetail.objects.create(
+            payroll=self.payroll,
+            user=self.employee,
+            base_salary=Decimal("3000000"),
         )
-        DetalleNomina.objects.create(
-            nomina=self.nomina,
-            usuario=otro_empleado,
-            salario_base=Decimal("5000000"),
+        PayrollDetail.objects.create(
+            payroll=self.payroll,
+            user=otro_empleado,
+            base_salary=Decimal("5000000"),
         )
 
-        self.autenticar(self.empleado)
-        lista = self.client.get("/api/nomina/")
-        detalle = self.client.get(f"/api/nomina/{self.nomina.id}/")
+        self.autenticar(self.employee)
+        lista = self.client.get("/api/payroll/")
+        detalle = self.client.get(f"/api/payroll/{self.payroll.id}/")
 
         for respuesta in (lista, detalle):
             self.assertEqual(respuesta.status_code, status.HTTP_200_OK)
@@ -324,23 +324,23 @@ class SolicitudesNominaSalidasTests(DatosBaseTests):
                 nominas = respuesta.data
             detalles = nominas[0]["detalles"]
             self.assertEqual(len(detalles), 1)
-            self.assertEqual(detalles[0]["usuario"], self.empleado.id)
-            self.assertEqual(detalles[0]["salario_base"], "3000000.00")
+            self.assertEqual(detalles[0]["user"], self.employee.id)
+            self.assertEqual(detalles[0]["base_salary"], "3000000.00")
             self.assertNotIn("5000000.00", str(respuesta.data))
 
         self.autenticar(self.gerente)
-        respuesta_gerente = self.client.get(f"/api/nomina/{self.nomina.id}/")
+        respuesta_gerente = self.client.get(f"/api/payroll/{self.payroll.id}/")
         self.assertEqual(respuesta_gerente.status_code, status.HTTP_200_OK)
         self.assertEqual(len(respuesta_gerente.data["detalles"]), 2)
 
     def test_comprobante_pdf_y_reporte_csv(self):
-        detalle = DetalleNomina.objects.create(
-            nomina=self.nomina, usuario=self.empleado, salario_base=Decimal("3000000"),
-            total_neto=Decimal("2880000"),
+        detalle = PayrollDetail.objects.create(
+            payroll=self.payroll, user=self.employee, base_salary=Decimal("3000000"),
+            net_total=Decimal("2880000"),
         )
-        self.autenticar(self.empleado)
-        pdf = self.client.get(f"/api/comprobantes/{detalle.id}/pdf/")
-        csv = self.client.get("/api/reportes/nomina.csv")
+        self.autenticar(self.employee)
+        pdf = self.client.get(f"/api/pay_slips/{detalle.id}/pdf/")
+        csv = self.client.get("/api/reports/payroll.csv")
         self.assertEqual(pdf.status_code, status.HTTP_200_OK)
         self.assertTrue(pdf.content.startswith(b"%PDF"))
         self.assertEqual(csv.status_code, status.HTTP_200_OK)
@@ -349,25 +349,25 @@ class SolicitudesNominaSalidasTests(DatosBaseTests):
 
 class ServiciosNominaDianTests(DatosBaseTests):
     def test_calculo_horas_separa_jornada_ordinaria_y_extra(self):
-        regla = ReglaLaboral.objects.create(pais="Colombia", activo=True)
+        regla = LaborRule.objects.create(country="Colombia", active=True)
         regla.refresh_from_db()
-        marcaje = Marcaje(
-            empleado=self.empleado,
-            sucursal=self.sucursal,
-            fecha=date(2026, 9, 15),
-            entrada=timezone.make_aware(datetime(2026, 9, 15, 8, 0)),
-            salida=timezone.make_aware(datetime(2026, 9, 15, 18, 0)),
+        marcaje = AttendanceRecord(
+            employee=self.employee,
+            branch=self.branch,
+            date=date(2026, 9, 15),
+            clock_in_time=timezone.make_aware(datetime(2026, 9, 15, 8, 0)),
+            clock_out_time=timezone.make_aware(datetime(2026, 9, 15, 18, 0)),
         )
 
-        desglose = calcular_horas_marcaje(marcaje, regla)
+        desglose = calculate_attendance_hours(marcaje, regla)
 
-        self.assertEqual(desglose.ordinarias_diurnas, Decimal("8"))
-        self.assertEqual(desglose.extra_diurnas, Decimal("2"))
+        self.assertEqual(desglose.regular_day_hours, Decimal("8"))
+        self.assertEqual(desglose.daytime_overtime_hours, Decimal("2"))
 
     def test_utilidades_dian_generan_firman_y_envian_en_modo_desarrollo(self):
-        documento = generar_documento_soporte({"identificador": "DOC-1", "total": "100"})
-        firmado = firmar_documento(documento, "secreto-de-prueba")
-        respuesta = enviar_documento(firmado)
+        documento = generate_support_document({"identificador": "DOC-1", "total": "100"})
+        firmado = sign_document(documento, "secreto-de-prueba")
+        respuesta = send_document(firmado)
 
         self.assertIn(b"DocumentoSoporte", documento)
         self.assertIn(b"firma-sha256", firmado)

@@ -15,22 +15,22 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Solicitud',
+            name='Request',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('tipo', models.CharField(choices=[('vacaciones', 'Vacaciones'), ('permiso', 'Permiso')], max_length=20)),
-                ('fecha_inicio', models.DateField()),
-                ('fecha_fin', models.DateField()),
-                ('motivo', models.TextField()),
-                ('estado', models.CharField(choices=[('pendiente', 'Pendiente'), ('aprobada', 'Aprobada'), ('rechazada', 'Rechazada')], default='pendiente', max_length=20)),
-                ('comentario_revision', models.TextField(blank=True)),
-                ('creada_en', models.DateTimeField(auto_now_add=True)),
-                ('actualizada_en', models.DateTimeField(auto_now=True)),
-                ('revisado_por', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='solicitudes_revisadas', to=settings.AUTH_USER_MODEL)),
-                ('solicitante', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='solicitudes', to=settings.AUTH_USER_MODEL)),
+                ('type', models.CharField(choices=[('vacaciones', 'Vacaciones'), ('permission', 'Permission')], max_length=20)),
+                ('start_date', models.DateField()),
+                ('end_date', models.DateField()),
+                ('reason', models.TextField()),
+                ('status', models.CharField(choices=[('pendiente', 'Pendiente'), ('approved', 'Aprobada'), ('rechazada', 'Rechazada')], default='pendiente', max_length=20)),
+                ('review_comment', models.TextField(blank=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+                ('reviewed_by', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='requests_reviewed', to=settings.AUTH_USER_MODEL)),
+                ('requester', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='time_off_requests', to=settings.AUTH_USER_MODEL)),
             ],
             options={
-                'ordering': ['-creada_en'],
+                'ordering': ['-created_at'],
             },
         ),
     ]

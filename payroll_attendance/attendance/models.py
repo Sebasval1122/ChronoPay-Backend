@@ -3,53 +3,53 @@ from django.db import models
 from django.utils import timezone
 
 
-class Marcaje(models.Model):
-	empleado = models.ForeignKey(
+class AttendanceRecord(models.Model):
+	employee = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
-		related_name="marcajes",
+		related_name="attendance_records",
 	)
-	sucursal = models.ForeignKey(
-		"sucursales.Sucursal",
+	branch = models.ForeignKey(
+		"branches.Branch",
 		on_delete=models.SET_NULL,
 		null=True,
 		blank=True,
-		related_name="marcajes",
+		related_name="attendance_records",
 	)
-	fecha = models.DateField(default=timezone.localdate)
-	entrada = models.DateTimeField()
-	salida = models.DateTimeField(null=True, blank=True)
-	registrado_por = models.ForeignKey(
+	date = models.DateField(default=timezone.localdate)
+	clock_in_time = models.DateTimeField()
+	clock_out_time = models.DateTimeField(null=True, blank=True)
+	recorded_by = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.SET_NULL,
 		null=True,
 		blank=True,
 		related_name="marcajes_registrados",
 	)
-	corregido_por = models.ForeignKey(
+	corrected_by = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.SET_NULL,
 		null=True,
 		blank=True,
 		related_name="marcajes_corregidos",
 	)
-	motivo_correccion = models.CharField(max_length=255, blank=True)
-	creado_en = models.DateTimeField(auto_now_add=True)
-	actualizado_en = models.DateTimeField(auto_now=True)
+	correction_reason = models.CharField(max_length=255, blank=True)
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
 
 	class Meta:
-		ordering = ["-fecha", "-entrada"]
+		ordering = ["-date", "-clock_in_time"]
 		db_table = "registro_marcaje"
 		indexes = [
 			models.Index(
-				fields=["empleado", "fecha"],
+				fields=["employee", "date"],
 				name="asistencia_empleado_fecha_idx",
 			),
 			models.Index(
-				fields=["sucursal", "fecha"],
+				fields=["branch", "date"],
 				name="asistencia_sucursal_fecha_idx",
 			),
 		]
 
 	def __str__(self):
-		return f"{self.empleado} - {self.fecha}"
+		return f"{self.employee} - {self.date}"

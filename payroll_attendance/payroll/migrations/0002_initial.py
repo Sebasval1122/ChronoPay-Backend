@@ -10,29 +10,29 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('nomina', '0001_initial'),
-        ('sucursales', '0001_initial'),
+        ('payroll', '0001_initial'),
+        ('branches', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='detallenomina',
-            name='usuario',
+            model_name='payrolldetail',
+            name='user',
             field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='detalles_nomina', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
-            model_name='nomina',
-            name='sucursal',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='nominas', to='sucursales.sucursal'),
+            model_name='payroll',
+            name='branch',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, related_name='nominas', to='branches.branch'),
         ),
         migrations.AddField(
-            model_name='detallenomina',
-            name='nomina',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='detalles', to='nomina.nomina'),
+            model_name='payrolldetail',
+            name='payroll',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='detalles', to='payroll.payroll'),
         ),
         migrations.AddConstraint(
-            model_name='detallenomina',
-            constraint=models.UniqueConstraint(fields=('nomina', 'usuario'), name='unique_detalle_usuario_por_nomina'),
+            model_name='payrolldetail',
+            constraint=models.UniqueConstraint(fields=('payroll', 'user'), name='unique_detalle_usuario_por_nomina'),
         ),
     ]

@@ -1,33 +1,33 @@
 from rest_framework import serializers
 
-from .models import ConsentimientoDatos, PoliticaTratamiento
+from .models import DataConsent, DataPolicy
 
 
 class PoliticaTratamientoSerializer(serializers.ModelSerializer):
     class Meta:
-        model = PoliticaTratamiento
+        model = DataPolicy
         fields = "__all__"
-        read_only_fields = ["publicada_en"]
+        read_only_fields = ["published_at"]
 
     def validate(self, attrs):
-        if not attrs.get("contenido", "").strip():
-            raise serializers.ValidationError("El contenido de la política es obligatorio.")
+        if not attrs.get("content", "").strip():
+            raise serializers.ValidationError("El content de la política es obligatorio.")
         return attrs
 
 
 class ConsentimientoDatosSerializer(serializers.ModelSerializer):
-    politica_version = serializers.CharField(source="politica.version", read_only=True)
+    policy_version = serializers.CharField(source="policy.version", read_only=True)
 
     class Meta:
-        model = ConsentimientoDatos
+        model = DataConsent
         fields = [
-            "id", "usuario", "politica", "politica_version", "aceptado", "otorgado_en",
+            "id", "user", "policy", "policy_version", "aceptado", "granted_at",
         ]
-        read_only_fields = ["usuario", "otorgado_en", "politica_version"]
+        read_only_fields = ["user", "granted_at", "policy_version"]
 
-    def validate_politica(self, politica):
-        if not politica.vigente:
+    def validate_politica(self, policy):
+        if not policy.vigente:
             raise serializers.ValidationError(
                 "Solo puedes aceptar la política de tratamiento vigente."
             )
-        return politica
+        return policy

@@ -3,7 +3,7 @@ from rest_framework import permissions
 from common.permissions import is_admin_or_same_branch
 
 
-class EsAdminOGerente(permissions.BasePermission):
+class IsAdminOrManager(permissions.BasePermission):
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated
@@ -11,8 +11,8 @@ class EsAdminOGerente(permissions.BasePermission):
         )
 
 
-class EsPropioUsuarioOAdmin(permissions.BasePermission):
+class IsSelfOrAdmin(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if obj.pk == request.user.pk:
             return True
-        return is_admin_or_same_branch(request.user, obj.sucursal_id)
+        return is_admin_or_same_branch(request.user, obj.branch_id)

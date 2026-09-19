@@ -1,24 +1,24 @@
 from rest_framework import serializers
 
-from .models import Incapacidad, Licencia, Permiso
+from .models import SickLeave, Leave, Permission
 
 
-class IncapacidadSerializer(serializers.ModelSerializer):
+class SickLeaveSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Incapacidad
+        model = SickLeave
         fields = "__all__"
-        read_only_fields = ["creada_en"]
+        read_only_fields = ["created_at"]
 
 
-class LicenciaSerializer(serializers.ModelSerializer):
+class LeaveSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Licencia
+        model = Leave
         fields = "__all__"
-        read_only_fields = ["creada_en"]
+        read_only_fields = ["created_at"]
 
 
-class PermisoSerializer(serializers.ModelSerializer):
+class PermissionSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Permiso
+        model = Permission
         fields = "__all__"
-        read_only_fields = ["creada_en"]
+        read_only_fields = ["created_at"]

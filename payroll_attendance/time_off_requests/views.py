@@ -5,38 +5,38 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from common.permissions import is_admin_or_same_branch
-from .models import EstadoSolicitud, Solicitud
+from .models import RequestStatus, Request
 
 
-class SolicitudSerializer(serializers.ModelSerializer):
-	solicitante_nombre = serializers.CharField(
-		source="solicitante.get_full_name", read_only=True
+class RequestSerializer(serializers.ModelSerializer):
+	requester_name = serializers.CharField(
+		source="requester.get_full_name", read_only=True
 	)
 
 	class Meta:
-		model = Solicitud
+		model = Request
 		fields = "__all__"
 		read_only_fields = [
-			"solicitante",
-			"estado",
-			"revisado_por",
-			"comentario_revision",
-			"creada_en",
-			"actualizada_en",
+			"requester",
+			"status",
+			"reviewed_by",
+			"review_comment",
+			"created_at",
+			"updated_at",
 		]
 
 	def validate(self, attrs):
-		if attrs["fecha_fin"] < attrs["fecha_inicio"]:
+		if attrs["end_date"] < attrs["start_date"]:
 			raise serializers.ValidationError(
-				"La fecha final no puede ser anterior a la fecha inicial."
+				"La date final no puede ser anterior a la date inicial."
 			)
 		return attrs
 
 
-class SolicitudViewSet(viewsets.ModelViewSet):
-	serializer_class = SolicitudSerializer
+class RequestViewSet(viewsets.ModelViewSet):
+	serializer_class = RequestSerializer
 	permission_classes = [IsAuthenticated]
-	queryset = Solicitud.objects.select_related("solicitante", "revisado_por")
+	queryset = Request.objects.select_related("requester", "reviewed_by")
 	http_method_names = ["get", "post", "patch", "head", "options"]
 
 	def get_queryset(self):
@@ -46,25 +46,25 @@ class SolicitudViewSet(viewsets.ModelViewSet):
 			return queryset
 		if user.rol == "gerente_sucursal":
 			return queryset.filter(
-				Q(solicitante__sucursal=user.sucursal) | Q(solicitante=user)
+				Q(requester__branch=user.branch) | Q(requester=user)
 			)
-		return queryset.filter(solicitante=user)
+		return queryset.filter(requester=user)
 
 	def perform_create(self, serializer):
-		serializer.save(solicitante=self.request.user)
+		serializer.save(requester=self.request.user)
 
-	@action(detail=True, methods=["post"], url_path="resolver")
-	def resolver(self, request, pk=None):
+	@action(detail=True, methods=["post"], url_path="resolve")
+	def resolve(self, request, pk=None):
 		if request.user.rol not in {"admin_general", "gerente_sucursal"}:
-			return Response({"detail": "No tienes permisos para resolver solicitudes."}, status=403)
-		solicitud = self.get_object()
-		if not is_admin_or_same_branch(request.user, solicitud.solicitante.sucursal_id):
-			return Response({"detail": "La solicitud no pertenece a tu sucursal."}, status=403)
-		estado = request.data.get("estado")
-		if estado not in {EstadoSolicitud.APROBADA, EstadoSolicitud.RECHAZADA}:
-			return Response({"detail": "El estado debe ser aprobada o rechazada."}, status=400)
-		solicitud.estado = estado
-		solicitud.revisado_por = request.user
-		solicitud.comentario_revision = request.data.get("comentario_revision", "")
-		solicitud.save(update_fields=["estado", "revisado_por", "comentario_revision", "actualizada_en"])
-		return Response(self.get_serializer(solicitud).data, status=status.HTTP_200_OK)
+			return Response({"detail": "No tienes permissions para resolve time_off_requests."}, status=403)
+		time_off_request = self.get_object()
+		if not is_admin_or_same_branch(request.user, time_off_request.requester.branch_id):
+			return Response({"detail": "La request no pertenece a tu branch."}, status=403)
+		request_status = request.data.get("status")
+		if request_status not in {RequestStatus.APROBADA, RequestStatus.RECHAZADA}:
+			return Response({"detail": "El status debe ser approved o rechazada."}, status=400)
+		time_off_request.status = request_status
+		time_off_request.reviewed_by = request.user
+		time_off_request.review_comment = request.data.get("review_comment", "")
+		time_off_request.save(update_fields=["status", "reviewed_by", "review_comment", "updated_at"])
+		return Response(self.get_serializer(time_off_request).data, status=status.HTTP_200_OK)

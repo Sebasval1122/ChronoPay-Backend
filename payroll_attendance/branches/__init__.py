@@ -1,1 +1,1 @@
-"""Aplicación de sucursales."""
+"""Aplicación de branches."""

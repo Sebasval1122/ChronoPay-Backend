@@ -1,8 +1,8 @@
 from rest_framework import permissions
 
 
-class EsAdminGeneral(permissions.BasePermission):
-    """Permite lectura a usuarios autenticados y escritura solo a admin general."""
+class IsGeneralAdmin(permissions.BasePermission):
+    """Permite lectura a users autenticados y escritura solo a admin general."""
 
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:

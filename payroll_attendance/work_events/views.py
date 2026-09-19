@@ -1,44 +1,44 @@
 from rest_framework import permissions, viewsets
 
-from .models import Incapacidad, Licencia, Permiso
+from .models import SickLeave, Leave, Permission
 from .serializers import (
-    IncapacidadSerializer,
-    LicenciaSerializer,
-    PermisoSerializer,
+    SickLeaveSerializer,
+    LeaveSerializer,
+    PermissionSerializer,
 )
 
 
-class IncapacidadViewSet(viewsets.ModelViewSet):
-    queryset = Incapacidad.objects.all()
-    serializer_class = IncapacidadSerializer
+class SickLeaveViewSet(viewsets.ModelViewSet):
+    queryset = SickLeave.objects.all()
+    serializer_class = SickLeaveSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return self.queryset.filter(usuario=self.request.user)
+        return self.queryset.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(usuario=self.request.user)
+        serializer.save(user=self.request.user)
 
 
-class LicenciaViewSet(viewsets.ModelViewSet):
-    queryset = Licencia.objects.all()
-    serializer_class = LicenciaSerializer
+class LeaveViewSet(viewsets.ModelViewSet):
+    queryset = Leave.objects.all()
+    serializer_class = LeaveSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return self.queryset.filter(usuario=self.request.user)
+        return self.queryset.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(usuario=self.request.user)
+        serializer.save(user=self.request.user)
 
 
-class PermisoViewSet(viewsets.ModelViewSet):
-    queryset = Permiso.objects.all()
-    serializer_class = PermisoSerializer
+class PermissionViewSet(viewsets.ModelViewSet):
+    queryset = Permission.objects.all()
+    serializer_class = PermissionSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return self.queryset.filter(usuario=self.request.user)
+        return self.queryset.filter(user=self.request.user)
 
     def perform_create(self, serializer):
-        serializer.save(usuario=self.request.user)
+        serializer.save(user=self.request.user)

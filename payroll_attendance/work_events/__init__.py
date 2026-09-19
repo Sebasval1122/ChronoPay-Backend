@@ -1,1 +1,1 @@
-"""Aplicación de novedades laborales."""
+"""Aplicación de work_events laborales."""

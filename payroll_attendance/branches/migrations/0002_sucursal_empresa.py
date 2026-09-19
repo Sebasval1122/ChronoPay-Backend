@@ -7,14 +7,14 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('empresas', '0001_initial'),
-        ('sucursales', '0001_initial'),
+        ('companies', '0001_initial'),
+        ('branches', '0001_initial'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='sucursal',
-            name='empresa',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='sucursales', to='empresas.empresa'),
+            model_name='branch',
+            name='company',
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='branches', to='companies.company'),
         ),
     ]

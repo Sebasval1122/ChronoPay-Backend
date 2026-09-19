@@ -36,20 +36,20 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
-    "empresas",
-    "usuarios",
-    "sucursales",
-    "asistencia",
-    "nomina",
-    "reglas_laborales",
-    "novedades",
-    "privacidad",
-    "comprobantes",
-    "solicitudes",
-    "reportes",
+    "companies",
+    "users",
+    "branches",
+    "attendance",
+    "payroll",
+    "labor_rules",
+    "work_events",
+    "privacy",
+    "pay_slips",
+    "time_off_requests",
+    "reports",
 ]
 
-AUTH_USER_MODEL = "usuarios.Usuario"
+AUTH_USER_MODEL = "users.User"
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",

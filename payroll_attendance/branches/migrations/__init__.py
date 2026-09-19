@@ -1,1 +1,1 @@
-"""Migraciones de la aplicación de sucursales."""
+"""Migraciones de la aplicación de branches."""

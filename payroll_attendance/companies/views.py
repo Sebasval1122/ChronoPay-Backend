@@ -7,46 +7,46 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from sucursales.models import Sucursal
+from branches.models import Branch
 
-from .models import Empresa
-from .serializers import RegistroEmpresaSerializer
-from .throttles import RegistroEmpresaThrottle
-
-
-Usuario = get_user_model()
+from .models import Company
+from .serializers import CompanyRegistrationSerializer
+from .throttles import CompanyRegistrationThrottle
 
 
-class RegistroEmpresaView(APIView):
+User = get_user_model()
+
+
+class CompanyRegistrationView(APIView):
     permission_classes = [AllowAny]
-    throttle_classes = [RegistroEmpresaThrottle]
+    throttle_classes = [CompanyRegistrationThrottle]
 
     def post(self, request):
-        serializer = RegistroEmpresaSerializer(data=request.data)
+        serializer = CompanyRegistrationSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         datos = serializer.validated_data
 
         try:
             with transaction.atomic():
-                empresa = Empresa.objects.create(
-                    nombre=datos["nombre_empresa"],
-                    email_contacto=datos["email"],
+                company = Company.objects.create(
+                    name=datos["company_name"],
+                    contact_email=datos["email"],
                 )
-                sucursal = Sucursal.objects.create(
-                    empresa=empresa,
-                    nombre="Principal",
-                    codigo=self._generar_codigo_sucursal(),
+                branch = Branch.objects.create(
+                    company=company,
+                    name="Principal",
+                    codigo=self._generate_branch_code(),
                 )
-                usuario = Usuario(
+                user = User(
                     username=datos["username"],
-                    first_name=datos["nombre_admin"],
-                    last_name=datos["apellido_admin"],
+                    first_name=datos["admin_first_name"],
+                    last_name=datos["admin_last_name"],
                     email=datos["email"],
                     rol="admin_general",
-                    sucursal=sucursal,
+                    branch=branch,
                 )
-                usuario.set_password(datos["password"])
-                usuario.save()
+                user.set_password(datos["password"])
+                user.save()
         except IntegrityError:
             return Response(
                 {"detail": "No fue posible completar el registro con los datos proporcionados."},
@@ -55,17 +55,17 @@ class RegistroEmpresaView(APIView):
 
         return Response(
             {
-                "detail": "Empresa registrada correctamente.",
-                "empresa_id": empresa.id,
-                "sucursal_id": sucursal.id,
-                "usuario_id": usuario.id,
+                "detail": "Company registrada correctamente.",
+                "company_id": company.id,
+                "branch_id": branch.id,
+                "user_id": user.id,
             },
             status=status.HTTP_201_CREATED,
         )
 
     @staticmethod
-    def _generar_codigo_sucursal():
+    def _generate_branch_code():
         while True:
             codigo = f"PRINCIPAL-{uuid.uuid4().hex[:20]}"
-            if not Sucursal.objects.filter(codigo=codigo).exists():
+            if not Branch.objects.filter(codigo=codigo).exists():
                 return codigo

@@ -6,16 +6,16 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('privacidad', '0002_initial'),
+        ('privacy', '0002_initial'),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='consentimientodatos',
-            options={'ordering': ['-otorgado_en']},
+            name='dataconsent',
+            options={'ordering': ['-granted_at']},
         ),
         migrations.AlterModelOptions(
-            name='politicatratamiento',
-            options={'ordering': ['-publicada_en', '-id']},
+            name='datapolicy',
+            options={'ordering': ['-published_at', '-id']},
         ),
     ]

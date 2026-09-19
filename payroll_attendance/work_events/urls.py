@@ -1,14 +1,14 @@
 from rest_framework.routers import DefaultRouter
 
 from .views import (
-	IncapacidadViewSet,
-	LicenciaViewSet,
-	PermisoViewSet,
+	SickLeaveViewSet,
+	LeaveViewSet,
+	PermissionViewSet,
 )
 
 router = DefaultRouter()
-router.register(r"incapacidades", IncapacidadViewSet, basename="incapacidad")
-router.register(r"licencias", LicenciaViewSet, basename="licencia")
-router.register(r"permisos", PermisoViewSet, basename="permiso")
+router.register(r"sickleavees", SickLeaveViewSet, basename="sickleave")
+router.register(r"leaves", LeaveViewSet, basename="leave")
+router.register(r"permissions", PermissionViewSet, basename="permission")
 
 urlpatterns = router.urls

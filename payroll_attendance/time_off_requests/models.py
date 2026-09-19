@@ -2,46 +2,46 @@ from django.conf import settings
 from django.db import models
 
 
-class TipoSolicitud(models.TextChoices):
+class RequestType(models.TextChoices):
 	VACACIONES = "vacaciones", "Vacaciones"
-	PERMISO = "permiso", "Permiso"
+	PERMISO = "permission", "Permission"
 
 
-class EstadoSolicitud(models.TextChoices):
+class RequestStatus(models.TextChoices):
 	PENDIENTE = "pendiente", "Pendiente"
-	APROBADA = "aprobada", "Aprobada"
+	APROBADA = "approved", "Aprobada"
 	RECHAZADA = "rechazada", "Rechazada"
 
 
-class Solicitud(models.Model):
-	solicitante = models.ForeignKey(
+class Request(models.Model):
+	requester = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.CASCADE,
-		related_name="solicitudes",
+		related_name="time_off_requests",
 	)
-	tipo = models.CharField(max_length=20, choices=TipoSolicitud.choices)
-	fecha_inicio = models.DateField()
-	fecha_fin = models.DateField()
-	motivo = models.TextField()
-	estado = models.CharField(
+	type = models.CharField(max_length=20, choices=RequestType.choices)
+	start_date = models.DateField()
+	end_date = models.DateField()
+	reason = models.TextField()
+	status = models.CharField(
 		max_length=20,
-		choices=EstadoSolicitud.choices,
-		default=EstadoSolicitud.PENDIENTE,
+		choices=RequestStatus.choices,
+		default=RequestStatus.PENDIENTE,
 	)
-	revisado_por = models.ForeignKey(
+	reviewed_by = models.ForeignKey(
 		settings.AUTH_USER_MODEL,
 		on_delete=models.SET_NULL,
 		null=True,
 		blank=True,
-		related_name="solicitudes_revisadas",
+		related_name="requests_reviewed",
 	)
-	comentario_revision = models.TextField(blank=True)
-	creada_en = models.DateTimeField(auto_now_add=True)
-	actualizada_en = models.DateTimeField(auto_now=True)
+	review_comment = models.TextField(blank=True)
+	created_at = models.DateTimeField(auto_now_add=True)
+	updated_at = models.DateTimeField(auto_now=True)
 
 	class Meta:
-		ordering = ["-creada_en"]
+		ordering = ["-created_at"]
 
 	def __str__(self):
-		return f"{self.get_tipo_display()} - {self.solicitante} ({self.estado})"
-# Modelos de solicitudes de vacaciones y permisos
+		return f"{self.get_type_display()} - {self.requester} ({self.status})"
+# Modelos de time_off_requests de vacaciones y permissions

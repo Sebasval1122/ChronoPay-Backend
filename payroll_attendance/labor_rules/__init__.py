@@ -1,1 +1,1 @@
-"""Aplicación de reglas laborales."""
+"""Aplicación de rules laborales."""

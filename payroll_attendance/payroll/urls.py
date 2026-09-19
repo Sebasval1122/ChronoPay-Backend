@@ -1,8 +1,8 @@
 from rest_framework.routers import DefaultRouter
 
-from .views import NominaViewSet
+from .views import PayrollViewSet
 
 
 router = DefaultRouter()
-router.register("", NominaViewSet, basename="nomina")
+router.register("", PayrollViewSet, basename="payroll")
 urlpatterns = router.urls

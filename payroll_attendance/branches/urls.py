@@ -1,7 +1,7 @@
 from rest_framework.routers import DefaultRouter
 
-from .views import SucursalViewSet
+from .views import BranchViewSet
 
 router = DefaultRouter()
-router.register("", SucursalViewSet, basename="sucursal")
+router.register("", BranchViewSet, basename="branch")
 urlpatterns = router.urls

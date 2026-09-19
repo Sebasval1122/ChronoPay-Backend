@@ -1,1 +1,1 @@
-"""Aplicación de privacidad y protección de datos."""
+"""Aplicación de privacy y protección de datos."""

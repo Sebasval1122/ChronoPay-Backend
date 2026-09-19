@@ -2,37 +2,37 @@ from django.conf import settings
 from django.db import models
 
 
-class NovedadBase(models.Model):
+class WorkEvent(models.Model):
     """Campos comunes de una novedad laboral."""
 
-    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    fecha_inicio = models.DateField()
-    fecha_fin = models.DateField()
-    descripcion = models.TextField(blank=True)
-    aprobada = models.BooleanField(default=False)
-    creada_en = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    start_date = models.DateField()
+    end_date = models.DateField()
+    description = models.TextField(blank=True)
+    approved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         abstract = True
-        ordering = ["-fecha_inicio"]
+        ordering = ["-start_date"]
 
     def __str__(self):
-        return f"{self.__class__.__name__} - {self.usuario}"
+        return f"{self.__class__.__name__} - {self.user}"
 
 
-class Incapacidad(NovedadBase):
-    """Incapacidad médica reportada por un usuario."""
+class SickLeave(WorkEvent):
+    """SickLeave médica reportada por un user."""
 
-    diagnostico = models.CharField(max_length=255, blank=True)
-
-
-class Licencia(NovedadBase):
-    """Licencia laboral aprobada para un usuario."""
-
-    motivo = models.CharField(max_length=255)
+    diagnosis = models.CharField(max_length=255, blank=True)
 
 
-class Permiso(NovedadBase):
-    """Permiso laboral solicitado por un usuario."""
+class Leave(WorkEvent):
+    """Leave laboral approved para un user."""
 
-    motivo = models.CharField(max_length=255)
+    reason = models.CharField(max_length=255)
+
+
+class Permission(WorkEvent):
+    """Permission laboral solicitado por un user."""
+
+    reason = models.CharField(max_length=255)

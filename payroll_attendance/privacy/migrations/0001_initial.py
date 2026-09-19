@@ -12,21 +12,21 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='ConsentimientoDatos',
+            name='DataConsent',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('aceptado', models.BooleanField(default=False)),
-                ('otorgado_en', models.DateTimeField(auto_now_add=True)),
+                ('granted_at', models.DateTimeField(auto_now_add=True)),
             ],
         ),
         migrations.CreateModel(
-            name='PoliticaTratamiento',
+            name='DataPolicy',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('version', models.CharField(max_length=30, unique=True)),
-                ('contenido', models.TextField()),
+                ('content', models.TextField()),
                 ('vigente', models.BooleanField(default=False)),
-                ('publicada_en', models.DateTimeField(blank=True, null=True)),
+                ('published_at', models.DateTimeField(blank=True, null=True)),
             ],
         ),
     ]

@@ -1,35 +1,35 @@
 from rest_framework import viewsets
 
-from .models import DiaFestivo, ReglaLaboral
-from .permissions import EsAdminGeneral
-from .serializers import DiaFestivoSerializer, ReglaLaboralSerializer
+from .models import Holiday, LaborRule
+from .permissions import IsGeneralAdmin
+from .serializers import HolidaySerializer, LaborRuleSerializer
 
 
-class ReglaLaboralViewSet(viewsets.ModelViewSet):
-    """CRUD de reglas laborales por país."""
+class LaborRuleViewSet(viewsets.ModelViewSet):
+    """CRUD de rules laborales por país."""
 
-    queryset = ReglaLaboral.objects.all()
-    serializer_class = ReglaLaboralSerializer
-    permission_classes = [EsAdminGeneral]
+    queryset = LaborRule.objects.all()
+    serializer_class = LaborRuleSerializer
+    permission_classes = [IsGeneralAdmin]
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        pais = self.request.query_params.get("pais")
-        if pais:
-            queryset = queryset.filter(pais__iexact=pais)
+        country = self.request.query_params.get("country")
+        if country:
+            queryset = queryset.filter(pais__iexact=country)
         return queryset
 
 
-class DiaFestivoViewSet(viewsets.ModelViewSet):
-    """CRUD de días festivos asociados a una regla laboral."""
+class HolidayViewSet(viewsets.ModelViewSet):
+    """CRUD de días festivos asociados a una labor_rule laboral."""
 
-    queryset = DiaFestivo.objects.all()
-    serializer_class = DiaFestivoSerializer
-    permission_classes = [EsAdminGeneral]
+    queryset = Holiday.objects.all()
+    serializer_class = HolidaySerializer
+    permission_classes = [IsGeneralAdmin]
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        regla_laboral_id = self.request.query_params.get("regla_laboral")
+        regla_laboral_id = self.request.query_params.get("labor_rule")
         if regla_laboral_id:
             queryset = queryset.filter(regla_laboral_id=regla_laboral_id)
         return queryset

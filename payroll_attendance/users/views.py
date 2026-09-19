@@ -3,77 +3,77 @@ from rest_framework import permissions, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from .models import Usuario, HistorialSalarial
+from .models import User, SalaryHistory
 from .serializers import (
-    UsuarioSerializer,
-    CrearUsuarioSerializer,
-    CambiarSalarioSerializer,
-    HistorialSalarialSerializer,
+    UserSerializer,
+    CreateUserSerializer,
+    ChangeSalarySerializer,
+    SalaryHistorySerializer,
 )
-from .permissions import EsAdminOGerente, EsPropioUsuarioOAdmin
+from .permissions import IsAdminOrManager, IsSelfOrAdmin
 
 
 class UsuarioViewSet(viewsets.ModelViewSet):
     """
-    CRUD de usuarios. La visibilidad depende del rol:
-    - admin_general: ve y gestiona todos los usuarios
-    - gerente_sucursal: ve y gestiona solo los usuarios de su sucursal
-    - empleado: solo puede ver/editar su propia información (vía /me)
+    CRUD de users. La visibilidad depende del rol:
+    - admin_general: ve y gestiona todos los users
+    - gerente_sucursal: ve y gestiona solo los users de su branch
+    - employee: solo puede ver/editar su propia información (vía /me)
     """
 
-    queryset = Usuario.objects.all()
-    permission_classes = [EsAdminOGerente, EsPropioUsuarioOAdmin]
+    queryset = User.objects.all()
+    permission_classes = [IsAdminOrManager, IsSelfOrAdmin]
 
     def get_serializer_class(self):
         if self.action == "create":
-            return CrearUsuarioSerializer
-        return UsuarioSerializer
+            return CreateUserSerializer
+        return UserSerializer
 
     def get_queryset(self):
         user = self.request.user
         queryset = super().get_queryset()
         if user.rol == "gerente_sucursal":
-            queryset = queryset.filter(sucursal=user.sucursal)
+            queryset = queryset.filter(branch=user.branch)
         return queryset
 
     @action(detail=False, methods=["get"], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
-        """Devuelve la información del usuario autenticado."""
-        serializer = UsuarioSerializer(request.user)
+        """Devuelve la información del user autenticado."""
+        serializer = UserSerializer(request.user)
         return Response(serializer.data)
 
-    @action(detail=True, methods=["post"], permission_classes=[EsAdminOGerente])
+    @action(detail=True, methods=["post"], permission_classes=[IsAdminOrManager])
     def cambiar_salario(self, request, pk=None):
         """
-        Cambia el salario de un usuario y deja el registro en el
+        Cambia el salario de un user y deja el registro en el
         historial salarial (trazabilidad del cambio).
         """
-        usuario = self.get_object()
-        serializer = CambiarSalarioSerializer(data=request.data)
+        user = self.get_object()
+        serializer = ChangeSalarySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        salario_anterior = usuario.salario_actual
-        salario_nuevo = serializer.validated_data["salario_nuevo"]
-        motivo = serializer.validated_data.get("motivo", "")
+        previous_salary = user.current_salary
+        new_salary = serializer.validated_data["new_salary"]
+        reason = serializer.validated_data.get("reason", "")
 
         with transaction.atomic():
-            usuario.salario_actual = salario_nuevo
-            usuario.save(update_fields=["salario_actual"])
+            user.current_salary = new_salary
+            user.save(update_fields=["current_salary"])
 
-            HistorialSalarial.objects.create(
-                usuario=usuario,
-                salario_anterior=salario_anterior,
-                salario_nuevo=salario_nuevo,
-                motivo=motivo,
-                registrado_por=request.user,
+            SalaryHistory.objects.create(
+                user=user,
+                previous_salary=previous_salary,
+                new_salary=new_salary,
+                reason=reason,
+                recorded_by=request.user,
             )
 
-        return Response(UsuarioSerializer(usuario).data, status=status.HTTP_200_OK)
+        return Response(UserSerializer(user).data, status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=["get"], permission_classes=[EsAdminOGerente])
+    @action(detail=True, methods=["get"], permission_classes=[IsAdminOrManager])
     def historial_salarial(self, request, pk=None):
-        """Devuelve el historial de cambios salariales de un usuario."""
-        usuario = self.get_object()
-        historial = usuario.historial_salarial.all()
-        serializer = HistorialSalarialSerializer(historial, many=True)
+        """Devuelve el historial de cambios salariales de un user."""
+        user = self.get_object()
+        historial = user.historial_salarial.all()
+        serializer = SalaryHistorySerializer(historial, many=True)
         return Response(serializer.data)

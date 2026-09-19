@@ -1,20 +1,20 @@
 from rest_framework import serializers
 
-from .models import Sucursal
+from .models import Branch
 
 
-class SucursalSerializer(serializers.ModelSerializer):
+class BranchSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Sucursal
+        model = Branch
         fields = [
             "id",
-            "nombre",
+            "name",
             "codigo",
-            "direccion",
-            "ciudad",
-            "telefono",
-            "activo",
-            "creado_en",
-            "actualizado_en",
+            "address",
+            "city",
+            "phone",
+            "active",
+            "created_at",
+            "updated_at",
         ]
-        read_only_fields = ["creado_en", "actualizado_en"]
+        read_only_fields = ["created_at", "updated_at"]

@@ -3,7 +3,7 @@
 from xml.etree.ElementTree import Element, SubElement, tostring
 
 
-def generar_documento_soporte(datos):
+def generate_support_document(datos):
     """Construye un XML base con los datos recibidos.
 
     La estructura fiscal final debe ajustarse al anexo técnico vigente de la DIAN.

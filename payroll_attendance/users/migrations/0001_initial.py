@@ -14,12 +14,12 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('auth', '0012_alter_user_first_name_max_length'),
-        ('sucursales', '0001_initial'),
+        ('branches', '0001_initial'),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Usuario',
+            name='User',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('password', models.CharField(max_length=128, verbose_name='password')),
@@ -32,13 +32,13 @@ class Migration(migrations.Migration):
                 ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
                 ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
                 ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
-                ('rol', models.CharField(choices=[('admin_general', 'Admin general'), ('gerente_sucursal', 'Gerente de sucursal'), ('empleado', 'Empleado')], default='empleado', max_length=20)),
-                ('cedula', models.CharField(blank=True, max_length=20, null=True, unique=True)),
-                ('telefono', models.CharField(blank=True, max_length=20)),
-                ('salario_actual', models.DecimalField(blank=True, decimal_places=2, help_text='Salario mensual base actual del empleado', max_digits=12, null=True)),
-                ('activo', models.BooleanField(default=True)),
+                ('rol', models.CharField(choices=[('admin_general', 'Admin general'), ('gerente_sucursal', 'Gerente de branch'), ('employee', 'Empleado')], default='employee', max_length=20)),
+                ('national_id', models.CharField(blank=True, max_length=20, null=True, unique=True)),
+                ('phone', models.CharField(blank=True, max_length=20)),
+                ('current_salary', models.DecimalField(blank=True, decimal_places=2, help_text='Salario mensual base actual del employee', max_digits=12, null=True)),
+                ('active', models.BooleanField(default=True)),
                 ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
-                ('sucursal', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='usuarios', to='sucursales.sucursal')),
+                ('branch', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='users', to='branches.branch')),
                 ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
             ],
             options={
@@ -51,20 +51,20 @@ class Migration(migrations.Migration):
             ],
         ),
         migrations.CreateModel(
-            name='HistorialSalarial',
+            name='SalaryHistory',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('salario_anterior', models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True)),
-                ('salario_nuevo', models.DecimalField(decimal_places=2, max_digits=12)),
-                ('fecha_cambio', models.DateTimeField(auto_now_add=True)),
-                ('motivo', models.CharField(blank=True, max_length=255)),
-                ('registrado_por', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='cambios_salariales_registrados', to=settings.AUTH_USER_MODEL)),
-                ('usuario', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='historial_salarial', to=settings.AUTH_USER_MODEL)),
+                ('previous_salary', models.DecimalField(blank=True, decimal_places=2, max_digits=12, null=True)),
+                ('new_salary', models.DecimalField(decimal_places=2, max_digits=12)),
+                ('change_date', models.DateTimeField(auto_now_add=True)),
+                ('reason', models.CharField(blank=True, max_length=255)),
+                ('recorded_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='cambios_salariales_registrados', to=settings.AUTH_USER_MODEL)),
+                ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='historial_salarial', to=settings.AUTH_USER_MODEL)),
             ],
             options={
                 'verbose_name': 'Historial salarial',
                 'verbose_name_plural': 'Historial salarial',
-                'ordering': ['-fecha_cambio'],
+                'ordering': ['-change_date'],
             },
         ),
     ]

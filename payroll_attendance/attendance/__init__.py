@@ -1,1 +1,1 @@
-"""Módulo de asistencia y control de marcajes."""
+"""Módulo de attendance y control de attendance_records."""

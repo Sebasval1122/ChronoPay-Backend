@@ -10,24 +10,24 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('novedades', '0001_initial'),
+        ('work_events', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='incapacidad',
-            name='usuario',
+            model_name='sickleave',
+            name='user',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
-            model_name='licencia',
-            name='usuario',
+            model_name='leave',
+            name='user',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
-            model_name='permiso',
-            name='usuario',
+            model_name='permission',
+            name='user',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
     ]

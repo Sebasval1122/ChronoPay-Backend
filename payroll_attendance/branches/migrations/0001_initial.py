@@ -12,22 +12,22 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='Sucursal',
+            name='Branch',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('nombre', models.CharField(max_length=150)),
+                ('name', models.CharField(max_length=150)),
                 ('codigo', models.CharField(max_length=30, unique=True)),
-                ('direccion', models.CharField(blank=True, max_length=255)),
-                ('ciudad', models.CharField(blank=True, max_length=100)),
-                ('telefono', models.CharField(blank=True, max_length=30)),
-                ('activo', models.BooleanField(default=True)),
-                ('creado_en', models.DateTimeField(auto_now_add=True)),
-                ('actualizado_en', models.DateTimeField(auto_now=True)),
+                ('address', models.CharField(blank=True, max_length=255)),
+                ('city', models.CharField(blank=True, max_length=100)),
+                ('phone', models.CharField(blank=True, max_length=30)),
+                ('active', models.BooleanField(default=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name': 'Sucursal',
+                'verbose_name': 'Branch',
                 'verbose_name_plural': 'Sucursales',
-                'ordering': ['nombre'],
+                'ordering': ['name'],
             },
         ),
     ]

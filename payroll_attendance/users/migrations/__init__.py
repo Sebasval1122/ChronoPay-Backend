@@ -1,1 +1,1 @@
-"""Migraciones de la aplicación de usuarios."""
+"""Migraciones de la aplicación de users."""

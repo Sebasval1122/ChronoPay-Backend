@@ -4,5 +4,5 @@ from .views import ReporteNominaCSVView
 
 
 urlpatterns = [
-	path("nomina.csv", ReporteNominaCSVView.as_view(), name="reporte-nomina-csv"),
+	path("payroll.csv", ReporteNominaCSVView.as_view(), name="reporte-payroll-csv"),
 ]

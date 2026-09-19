@@ -1,7 +1,7 @@
 from rest_framework.throttling import AnonRateThrottle
 
 
-class RegistroEmpresaThrottle(AnonRateThrottle):
+class CompanyRegistrationThrottle(AnonRateThrottle):
     scope = "registro_empresa"
     rate = "5/hour"
 

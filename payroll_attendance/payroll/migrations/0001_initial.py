@@ -12,15 +12,15 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='DetalleNomina',
+            name='PayrollDetail',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('salario_base', models.DecimalField(decimal_places=2, default=0, max_digits=14)),
-                ('horas_extra', models.DecimalField(decimal_places=2, default=0, max_digits=8)),
-                ('recargos', models.DecimalField(decimal_places=2, default=0, max_digits=14)),
-                ('retencion_fuente', models.DecimalField(decimal_places=2, default=0, max_digits=14)),
-                ('novedades', models.DecimalField(decimal_places=2, default=0, max_digits=14)),
-                ('total_neto', models.DecimalField(decimal_places=2, default=0, max_digits=14)),
+                ('base_salary', models.DecimalField(decimal_places=2, default=0, max_digits=14)),
+                ('overtime_hours', models.DecimalField(decimal_places=2, default=0, max_digits=8)),
+                ('surcharges', models.DecimalField(decimal_places=2, default=0, max_digits=14)),
+                ('withholding', models.DecimalField(decimal_places=2, default=0, max_digits=14)),
+                ('work_events', models.DecimalField(decimal_places=2, default=0, max_digits=14)),
+                ('net_total', models.DecimalField(decimal_places=2, default=0, max_digits=14)),
             ],
             options={
                 'verbose_name': 'Detalle de nómina',
@@ -28,19 +28,19 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
-            name='Nomina',
+            name='Payroll',
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('periodo_inicio', models.DateField()),
-                ('periodo_fin', models.DateField()),
-                ('estado', models.CharField(default='borrador', max_length=20)),
+                ('period_start', models.DateField()),
+                ('period_end', models.DateField()),
+                ('status', models.CharField(default='borrador', max_length=20)),
                 ('total', models.DecimalField(decimal_places=2, default=0, max_digits=14)),
-                ('creado_en', models.DateTimeField(auto_now_add=True)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
             ],
             options={
                 'verbose_name': 'Nómina',
                 'verbose_name_plural': 'Nóminas',
-                'ordering': ['-periodo_fin'],
+                'ordering': ['-period_end'],
             },
         ),
     ]

@@ -6,48 +6,48 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('nomina', '0002_initial'),
+        ('payroll', '0002_initial'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='detallenomina',
-            name='horas_dominicales_o_festivas',
+            model_name='payrolldetail',
+            name='sunday_or_holiday_hours',
             field=models.DecimalField(decimal_places=2, default=0, max_digits=8),
         ),
         migrations.AddField(
-            model_name='detallenomina',
-            name='horas_extra_diurnas',
+            model_name='payrolldetail',
+            name='overtime_day_hours',
             field=models.DecimalField(decimal_places=2, default=0, max_digits=8),
         ),
         migrations.AddField(
-            model_name='detallenomina',
-            name='horas_extra_dominicales_o_festivas',
+            model_name='payrolldetail',
+            name='holiday_overtime_hours',
             field=models.DecimalField(decimal_places=2, default=0, max_digits=8),
         ),
         migrations.AddField(
-            model_name='detallenomina',
-            name='horas_extra_nocturnas',
+            model_name='payrolldetail',
+            name='overtime_night_hours',
             field=models.DecimalField(decimal_places=2, default=0, max_digits=8),
         ),
         migrations.AddField(
-            model_name='detallenomina',
-            name='horas_ordinarias_diurnas',
+            model_name='payrolldetail',
+            name='regular_day_hours',
             field=models.DecimalField(decimal_places=2, default=0, max_digits=8),
         ),
         migrations.AddField(
-            model_name='detallenomina',
-            name='horas_ordinarias_nocturnas',
+            model_name='payrolldetail',
+            name='regular_night_hours',
             field=models.DecimalField(decimal_places=2, default=0, max_digits=8),
         ),
         migrations.AlterField(
-            model_name='detallenomina',
-            name='horas_extra',
+            model_name='payrolldetail',
+            name='overtime_hours',
             field=models.DecimalField(decimal_places=2, default=0, help_text='Total de horas extra del período (suma de todos los tipos anteriores)', max_digits=8),
         ),
         migrations.AlterField(
-            model_name='detallenomina',
-            name='recargos',
-            field=models.DecimalField(decimal_places=2, default=0, help_text='Valor monetario total de recargos y horas extra sobre el salario base', max_digits=14),
+            model_name='payrolldetail',
+            name='surcharges',
+            field=models.DecimalField(decimal_places=2, default=0, help_text='Valor monetario total de surcharges y horas extra sobre el salario base', max_digits=14),
         ),
     ]

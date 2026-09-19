@@ -10,23 +10,23 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('privacidad', '0001_initial'),
+        ('privacy', '0001_initial'),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='consentimientodatos',
-            name='usuario',
+            model_name='dataconsent',
+            name='user',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
-            model_name='consentimientodatos',
-            name='politica',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='privacidad.politicatratamiento'),
+            model_name='dataconsent',
+            name='policy',
+            field=models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='privacy.datapolicy'),
         ),
         migrations.AddConstraint(
-            model_name='consentimientodatos',
-            constraint=models.UniqueConstraint(fields=('usuario', 'politica'), name='unique_consentimiento_usuario_politica'),
+            model_name='dataconsent',
+            constraint=models.UniqueConstraint(fields=('user', 'policy'), name='unique_consentimiento_usuario_politica'),
         ),
     ]

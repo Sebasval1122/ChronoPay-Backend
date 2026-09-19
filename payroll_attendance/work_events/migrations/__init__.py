@@ -1,1 +1,1 @@
-"""Migraciones de novedades."""
+"""Migraciones de work_events."""

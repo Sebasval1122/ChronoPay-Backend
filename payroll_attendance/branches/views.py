@@ -1,11 +1,11 @@
 from rest_framework import viewsets
 
-from .models import Sucursal
-from .serializers import SucursalSerializer
+from .models import Branch
+from .serializers import BranchSerializer
 
 
-class SucursalViewSet(viewsets.ModelViewSet):
-    """CRUD de sucursales."""
+class BranchViewSet(viewsets.ModelViewSet):
+    """CRUD de branches."""
 
-    queryset = Sucursal.objects.all()
-    serializer_class = SucursalSerializer
+    queryset = Branch.objects.all()
+    serializer_class = BranchSerializer

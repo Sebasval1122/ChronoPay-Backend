@@ -2,75 +2,75 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 
-class Rol(models.TextChoices):
+class Role(models.TextChoices):
     ADMIN_GENERAL = "admin_general", "Admin general"
-    GERENTE_SUCURSAL = "gerente_sucursal", "Gerente de sucursal"
-    EMPLEADO = "empleado", "Empleado"
+    GERENTE_SUCURSAL = "gerente_sucursal", "Gerente de branch"
+    EMPLEADO = "employee", "Empleado"
 
 
-class Usuario(AbstractUser):
+class User(AbstractUser):
     """
-    Usuario del sistema. Reemplaza el modelo de usuario por defecto de
-    Django para poder agregar rol, sucursal y salario.
+    User del sistema. Reemplaza el modelo de user por defecto de
+    Django para poder agregar rol, branch y salario.
     """
 
     rol = models.CharField(
         max_length=20,
-        choices=Rol.choices,
-        default=Rol.EMPLEADO,
+        choices=Role.choices,
+        default=Role.EMPLEADO,
     )
 
-    # Un admin_general no pertenece a una sucursal específica.
-    # Un gerente_sucursal o empleado sí.
-    sucursal = models.ForeignKey(
-        "sucursales.Sucursal",
+    # Un admin_general no pertenece a una branch específica.
+    # Un gerente_sucursal o employee sí.
+    branch = models.ForeignKey(
+        "branches.Branch",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name="usuarios",
+        related_name="users",
     )
 
-    cedula = models.CharField(max_length=20, unique=True, null=True, blank=True)
-    telefono = models.CharField(max_length=20, blank=True)
+    national_id = models.CharField(max_length=20, unique=True, null=True, blank=True)
+    phone = models.CharField(max_length=20, blank=True)
 
-    salario_actual = models.DecimalField(
+    current_salary = models.DecimalField(
         max_digits=12, decimal_places=2, null=True, blank=True,
-        help_text="Salario mensual base actual del empleado"
+        help_text="Salario mensual base actual del employee"
     )
 
-    activo = models.BooleanField(default=True)
+    active = models.BooleanField(default=True)
 
     def __str__(self):
         return f"{self.get_full_name() or self.username} ({self.get_rol_display()})"
 
     @property
-    def es_admin_general(self):
-        return self.rol == Rol.ADMIN_GENERAL
+    def is_general_admin(self):
+        return self.rol == Role.ADMIN_GENERAL
 
     @property
-    def es_gerente_sucursal(self):
-        return self.rol == Rol.GERENTE_SUCURSAL
+    def is_branch_manager(self):
+        return self.rol == Role.GERENTE_SUCURSAL
 
     @property
-    def es_empleado(self):
-        return self.rol == Rol.EMPLEADO
+    def is_employee(self):
+        return self.rol == Role.EMPLEADO
 
 
-class HistorialSalarial(models.Model):
+class SalaryHistory(models.Model):
     """
-    Registra cada cambio de salario de un usuario, para trazabilidad
+    Registra cada cambio de salario de un user, para trazabilidad
     y auditoría (uno de los diferenciadores del proyecto).
     """
 
-    usuario = models.ForeignKey(
-        Usuario, on_delete=models.CASCADE, related_name="historial_salarial"
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="historial_salarial"
     )
-    salario_anterior = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    salario_nuevo = models.DecimalField(max_digits=12, decimal_places=2)
-    fecha_cambio = models.DateTimeField(auto_now_add=True)
-    motivo = models.CharField(max_length=255, blank=True)
-    registrado_por = models.ForeignKey(
-        Usuario,
+    previous_salary = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    new_salary = models.DecimalField(max_digits=12, decimal_places=2)
+    change_date = models.DateTimeField(auto_now_add=True)
+    reason = models.CharField(max_length=255, blank=True)
+    recorded_by = models.ForeignKey(
+        User,
         on_delete=models.SET_NULL,
         null=True,
         related_name="cambios_salariales_registrados",
@@ -79,7 +79,7 @@ class HistorialSalarial(models.Model):
     class Meta:
         verbose_name = "Historial salarial"
         verbose_name_plural = "Historial salarial"
-        ordering = ["-fecha_cambio"]
+        ordering = ["-change_date"]
 
     def __str__(self):
-        return f"{self.usuario} : {self.salario_anterior} -> {self.salario_nuevo}"
+        return f"{self.user} : {self.previous_salary} -> {self.new_salary}"

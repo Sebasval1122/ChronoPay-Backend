@@ -1,1 +1,1 @@
-"""Migraciones de la aplicación de solicitudes."""
+"""Migraciones de la aplicación de time_off_requests."""
