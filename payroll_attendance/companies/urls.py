@@ -4,5 +4,5 @@ from .views import CompanyRegistrationView
 
 
 urlpatterns = [
-    path("registro/", CompanyRegistrationView.as_view(), name="registro-company"),
+    path("register/", CompanyRegistrationView.as_view(), name="registro-company"),
 ]

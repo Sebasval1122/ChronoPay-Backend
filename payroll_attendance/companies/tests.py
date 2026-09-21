@@ -25,7 +25,7 @@ from .models import Company
 
 
 class RegistroEmpresaTests(APITestCase):
-    url = "/api/companies/registro/"
+    url = "/api/companies/register/"
 
     def setUp(self):
         cache.clear()
