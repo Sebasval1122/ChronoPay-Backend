@@ -4,9 +4,14 @@ from datetime import timedelta
 import os
 from pathlib import Path
 from django.core.exceptions import ImproperlyConfigured
+from pathlib import Path
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 
 def get_env_bool(name: str, default: bool = False) -> bool:
@@ -47,6 +52,8 @@ INSTALLED_APPS = [
     "pay_slips",
     "time_off_requests",
     "reports",
+    "budgets",
+    "dashboard",
 ]
 
 AUTH_USER_MODEL = "users.User"
