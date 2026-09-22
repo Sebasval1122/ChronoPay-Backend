@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from common.permissions import is_admin_or_same_branch
 from .models import PayrollDetail, Payroll
 from .services import generate_payroll
-
+from notifications.models import NotificationType
+from notifications.services import notify
 
 class PayrollDetailSerializer(serializers.ModelSerializer):
 	user_name = serializers.CharField(source="user.get_full_name", read_only=True)
@@ -67,4 +68,11 @@ class PayrollViewSet(viewsets.ModelViewSet):
 		if request.user.rol not in {"admin_general", "gerente_sucursal"}:
 			return Response({"detail": "No tienes permissions para generar nóminas."}, status=403)
 		generate_payroll(payroll)
+		for detalle in payroll.detalles.select_related("user").all():
+			notify(
+				detalle.user,
+				NotificationType.PAYROLL,
+				f"Your payroll for {payroll.period_start} to {payroll.period_end} is ready.",
+				link="/nomina",
+			)
 		return Response(self.get_serializer(payroll).data, status=status.HTTP_200_OK)

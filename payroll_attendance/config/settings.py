@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     "reports",
     "budgets",
     "dashboard",
+    "notifications",
 ]
 
 AUTH_USER_MODEL = "users.User"

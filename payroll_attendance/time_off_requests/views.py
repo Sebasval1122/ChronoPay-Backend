@@ -6,6 +6,8 @@ from rest_framework.response import Response
 
 from common.permissions import is_admin_or_same_branch
 from .models import RequestStatus, Request
+from notifications.models import NotificationType
+from notifications.services import notify
 
 
 class RequestSerializer(serializers.ModelSerializer):
@@ -67,4 +69,10 @@ class RequestViewSet(viewsets.ModelViewSet):
 		time_off_request.reviewed_by = request.user
 		time_off_request.review_comment = request.data.get("review_comment", "")
 		time_off_request.save(update_fields=["status", "reviewed_by", "review_comment", "updated_at"])
+		notify(
+			time_off_request.requester,
+			NotificationType.TIME_OFF,
+			f"Your {time_off_request.get_type_display().lower()} request was {time_off_request.get_status_display().lower()}.",
+			link="/solicitudes",
+		)
 		return Response(self.get_serializer(time_off_request).data, status=status.HTTP_200_OK)

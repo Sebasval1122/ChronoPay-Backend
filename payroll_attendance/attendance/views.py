@@ -6,7 +6,8 @@ from rest_framework.response import Response
 from .models import AttendanceRecord
 from .permissions import CanManageAttendance
 from .serializers import AttendanceRecordSerializer
-
+from notifications.models import NotificationType
+from notifications.services import notify
 
 class AttendanceRecordViewSet(viewsets.ModelViewSet):
 	queryset = AttendanceRecord.objects.select_related("employee", "branch")
@@ -52,4 +53,10 @@ class AttendanceRecordViewSet(viewsets.ModelViewSet):
 		serializer = self.get_serializer(attendance_record, data=request.data, partial=True)
 		serializer.is_valid(raise_exception=True)
 		serializer.save(corrected_by=request.user)
+		notify(
+			attendance_record.employee,
+			NotificationType.ATTENDANCE,
+			f"Your attendance record for {attendance_record.date} was corrected.",
+			link="/asistencia",
+		)
 		return Response(serializer.data)
